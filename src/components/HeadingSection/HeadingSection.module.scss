@@ -1,0 +1,19 @@
+.container {
+  grid-template-columns: auto max-content;
+  grid-gap: 1rem;
+  display: grid;
+}
+
+.content {
+  grid-template-columns: 1fr;
+  grid-gap: 1.25rem;
+  display: grid;
+}
+
+.title {
+  letter-spacing: 0.085rem;
+}
+
+.action {
+  margin: 1rem 0 auto;
+}
