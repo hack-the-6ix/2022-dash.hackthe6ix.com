@@ -1,0 +1,11 @@
+@use '~@ht6/react-ui/dist/styles/colors.module';
+
+.root {
+  @each $tag in map-keys(colors.$config) {
+    &--c-#{$tag} {
+      border-left: 0.25rem solid colors.getColor($tag);
+      background-color: colors.getColor($tag, $alpha: 0.2);
+      color: colors.getColor($tag);
+    }
+  }
+}

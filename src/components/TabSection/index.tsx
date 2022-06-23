@@ -1,4 +1,4 @@
-import { Typography } from '@ht6/react-ui';
+import { Typography, useTwoWayState } from '@ht6/react-ui';
 import { ReactNode } from 'react';
 import cx from 'classnames';
 import Card from '../Card';
@@ -20,12 +20,13 @@ export interface TabSectionProps<T extends Tab> extends ComponentProps<'div'> {
 
 function TabSection<T extends Tab>({
   onChange = () => {},
-  value = 0,
+  value: _value = 0,
   className,
   lazy,
   tabs,
   ...props
 }: TabSectionProps<T>) {
+  const [ value ] = useTwoWayState(_value);
   return (
     <Section
       {...props}
@@ -45,6 +46,7 @@ function TabSection<T extends Tab>({
               className={styles.tabText}
               textColor='copy-dark'
               textType='heading4'
+              type='button'
               as='button'
             >
               {tab.label}

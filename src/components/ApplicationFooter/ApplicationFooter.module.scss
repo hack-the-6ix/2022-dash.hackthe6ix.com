@@ -1,0 +1,13 @@
+@use '~@ht6/react-ui/dist/styles/colors.module';
+
+.root {
+  border-top: 1px solid colors.getColor(disabled-light);
+  grid-template-columns: auto auto;
+  justify-content: space-between;
+  padding-top: 1.5rem;
+  display: grid;
+
+  & button {
+    text-transform: uppercase;
+  }
+}

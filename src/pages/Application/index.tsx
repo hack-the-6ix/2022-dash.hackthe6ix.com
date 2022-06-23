@@ -1,5 +1,10 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { ApplicationFormProvider } from '../../components/ApplicationForm';
+import About from '../../components/ApplicationForm/About';
+import AtHt6 from '../../components/ApplicationForm/AtHt6';
+import Experience from '../../components/ApplicationForm/Experience';
+import TeamFormation from '../../components/ApplicationForm/TeamFormation';
 import { useConfig } from '../../components/Configuration/context';
 import HeadingSection from '../../components/HeadingSection';
 import TabSection from '../../components/TabSection';
@@ -8,22 +13,22 @@ import styles from './Application.module.scss';
 const tabs = [
   {
     label: '1. Team Formation',
-    element: <div>owo</div>,
+    element: TeamFormation,
     id: 'team-formation',
   },
   {
     label: '2. About You',
-    element: <div>uwu</div>,
+    element: About,
     id: 'about-you',
   },
   {
     label: '3. Your Experience',
-    element: <div>ewe</div>,
+    element: Experience,
     id: 'your-experience',
   },
   {
     label: '4. At HT6',
-    element: <div>twt</div>,
+    element: AtHt6,
     id: 'at-ht6',
   },
 ];
@@ -32,7 +37,8 @@ function Application() {
   const location = useLocation();
   const [selected, setSelected] = useState(() => {
     const { hash } = location;
-    return tabs.findIndex((tab) => hash === `#${tab.id}`) ?? 0;
+    const idx = tabs.findIndex((tab) => hash === `#${tab.id}`);
+    return idx < 0 ? 0 : idx;
   });
   const navigate = useNavigate();
   const { endDate } = useConfig();
@@ -48,6 +54,13 @@ function Application() {
     timeZone: 'est',
   }).format(endDate);
 
+  const updateUrl = (idx: number) => {
+    const tab = tabs[idx];
+    if (!tab) return;
+    navigate(`${location.pathname}#${tab.id}`, { replace: true });
+    setSelected(idx);
+  }
+
   return (
     <main className={styles.root}>
       <HeadingSection
@@ -59,14 +72,24 @@ function Application() {
           children: 'Sign Out',
         }}
       />
-      <TabSection
-        onChange={(tab, idx) => {
-          navigate(`${location.pathname}#${tab.id}`, { replace: true });
-          setSelected(idx);
-        }}
-        value={selected}
-        tabs={tabs}
-      />
+      <ApplicationFormProvider onSubmit={() => console.log('owo')}>
+        <TabSection
+          onChange={(_, idx) => {
+            updateUrl(idx);
+          }}
+          value={selected}
+          tabs={tabs.map((tab, key) => {
+            return {
+              ...tab,
+              element: <tab.element
+                onNext={() => updateUrl(key + 1)}
+                onBack={() => updateUrl(key - 1)}
+                key={key}
+              />
+            };
+        })}
+        />
+      </ApplicationFormProvider>
     </main>
   );
 }

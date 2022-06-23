@@ -25,26 +25,25 @@
   &:not(&--selected) {
     background-color: transparent;
     box-shadow: none;
+
+    &:hover,
+    &:focus {
+      background-color: colors.getColor(primary-3, $alpha: 0.04);
+    }
+
+    &:active {
+      background-color: colors.getColor(primary-3, $alpha: 0.08);
+    }
   }
 }
 
 .tabText {
-  @include mixins.transition(background-color, fast);
   padding: 1.25rem 1.25rem 1.75rem;
   text-transform: uppercase;
   background: none;
   cursor: pointer;
   border: none;
   width: 100%;
-
-  &:hover,
-  &:focus {
-    background-color: colors.getColor(primary-3, $alpha: 0.04);
-  }
-
-  &:active {
-    background-color: colors.getColor(primary-3, $alpha: 0.08);
-  }
 }
 
 .content {
