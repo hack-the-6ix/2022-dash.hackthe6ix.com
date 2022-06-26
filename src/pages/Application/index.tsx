@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ApplicationFormProvider } from '../../components/ApplicationForm';
+import { fill, forEach } from 'lodash';
+import {
+  ApplicationFormMessage,
+  ApplicationFormProvider,
+  FormValuesType,
+  useForm,
+} from '../../components/ApplicationForm';
 import About from '../../components/ApplicationForm/About';
 import AtHt6 from '../../components/ApplicationForm/AtHt6';
 import Experience from '../../components/ApplicationForm/Experience';
@@ -12,28 +18,47 @@ import styles from './Application.module.scss';
 
 const tabs = [
   {
-    label: '1. Team Formation',
+    label: (
+      <span>
+        1<span className={styles.label}>. Team Formation</span>
+      </span>
+    ),
     element: TeamFormation,
     id: 'team-formation',
   },
   {
-    label: '2. About You',
+    label: (
+      <span>
+        2<span className={styles.label}>. About You</span>
+      </span>
+    ),
     element: About,
     id: 'about-you',
   },
   {
-    label: '3. Your Experience',
+    label: (
+      <span>
+        3<span className={styles.label}>. Your Experience</span>
+      </span>
+    ),
     element: Experience,
     id: 'your-experience',
   },
   {
-    label: '4. At HT6',
+    label: (
+      <span>
+        4<span className={styles.label}>. At HT6</span>
+      </span>
+    ),
     element: AtHt6,
     id: 'at-ht6',
   },
 ];
 
-function Application() {
+function ApplicationContent() {
+  const [messages, setMessages] = useState<ApplicationFormMessage[][]>(
+    fill(Array(tabs.length), [])
+  );
   const location = useLocation();
   const [selected, setSelected] = useState(() => {
     const { hash } = location;
@@ -41,6 +66,61 @@ function Application() {
     return idx < 0 ? 0 : idx;
   });
   const navigate = useNavigate();
+  const { touched, setTouched, initialValues } = useForm();
+  const touch = (idx: number) => {
+    const section = Object.keys(initialValues)[idx] as keyof FormValuesType;
+    const updatedTouched: { [field: string]: true } = {};
+    forEach(initialValues[section], (_, key) => (updatedTouched[key] = true));
+    setTouched({
+      ...touched,
+      [section]: updatedTouched,
+    });
+  };
+
+  const updateUrl = (idx: number) => {
+    const tab = tabs[idx];
+    if (!tab) return;
+
+    navigate(`${location.pathname}#${tab.id}`, { replace: true });
+    setSelected(idx);
+  };
+
+  return (
+    <TabSection
+      onChange={(_, idx) => {
+        touch(selected);
+        updateUrl(idx);
+      }}
+      value={selected}
+      tabs={tabs.map((tab, key) => {
+        return {
+          ...tab,
+          element: (
+            <tab.element
+              messages={messages[key]}
+              onClose={(_, idx) => {
+                const _messages = [...messages];
+                _messages[key] = [..._messages[key]];
+                _messages[key].splice(idx, 1);
+                setMessages(_messages);
+              }}
+              onNext={() => {
+                touch(selected);
+                updateUrl(key + 1);
+              }}
+              onBack={() => {
+                updateUrl(key - 1);
+              }}
+              key={key}
+            />
+          ),
+        };
+      })}
+    />
+  );
+}
+
+function Application() {
   const { endDate } = useConfig();
   const formattedDate = new Intl.DateTimeFormat('en', {
     month: 'short',
@@ -54,13 +134,6 @@ function Application() {
     timeZone: 'est',
   }).format(endDate);
 
-  const updateUrl = (idx: number) => {
-    const tab = tabs[idx];
-    if (!tab) return;
-    navigate(`${location.pathname}#${tab.id}`, { replace: true });
-    setSelected(idx);
-  }
-
   return (
     <main className={styles.root}>
       <HeadingSection
@@ -73,22 +146,7 @@ function Application() {
         }}
       />
       <ApplicationFormProvider onSubmit={() => console.log('owo')}>
-        <TabSection
-          onChange={(_, idx) => {
-            updateUrl(idx);
-          }}
-          value={selected}
-          tabs={tabs.map((tab, key) => {
-            return {
-              ...tab,
-              element: <tab.element
-                onNext={() => updateUrl(key + 1)}
-                onBack={() => updateUrl(key - 1)}
-                key={key}
-              />
-            };
-        })}
-        />
+        <ApplicationContent />
       </ApplicationFormProvider>
     </main>
   );

@@ -1,18 +1,18 @@
-import { Button, Input, Typography } from "@ht6/react-ui";
-import { Dispatch, MouseEventHandler, SetStateAction, useState } from "react";
+import { Button, Input, Typography } from '@ht6/react-ui';
+import { Dispatch, MouseEventHandler, SetStateAction, useState } from 'react';
 import cx from 'classnames';
-import { ApplicationFormSection, FormValuesType, useForm } from "..";
-import { useConfig } from "../../Configuration/context";
+import { ApplicationFormSection, FormValuesType, useForm } from '..';
+import { useConfig } from '../../Configuration/context';
 import sharedStyles from '../ApplicationForm.module.scss';
 import styles from './TeamFormation.module.scss';
-import ApplicationFooter from "../../ApplicationFooter";
-import { ApplicationFormSectionProps } from "../types";
+import ApplicationFooter from '../../ApplicationFooter';
+import { ApplicationFormSectionProps } from '../types';
 
-export function validate(values: FormValuesType) {
+export function validate(values: FormValuesType) {}
 
-}
-
-function InitScreen({ setShowJoin }: {
+function InitScreen({
+  setShowJoin,
+}: {
   setShowJoin: Dispatch<SetStateAction<boolean>>;
 }) {
   const { teamFormationEndDate } = useConfig();
@@ -32,21 +32,13 @@ function InitScreen({ setShowJoin }: {
 
   return (
     <>
-      <Typography
-        textColor='primary-3'
-        textType='heading2'
-        as='h2'
-      >
+      <Typography textColor='primary-3' textType='heading2' as='h2'>
         You're currently not on a team.
       </Typography>
-      <Typography
-        textColor='copy-dark'
-        textType='heading4'
-        as='p'
-      >
-        Don't have a team? No worries! You can go solo or
-        decide after submitting your application. Just remember
-        to do so before {formattedDate} at {formattedTime} EST.
+      <Typography textColor='copy-dark' textType='heading4' as='p'>
+        Don't have a team? No worries! You can go solo or decide after
+        submitting your application. Just remember to do so before{' '}
+        {formattedDate} at {formattedTime} EST.
       </Typography>
       <div className={styles.buttons}>
         <Button
@@ -57,9 +49,7 @@ function InitScreen({ setShowJoin }: {
               team: {
                 ...values.team,
                 code: 'xxxxxx',
-                members: [
-                  'YOU',
-                ],
+                members: ['YOU'],
                 owner: true,
               },
             });
@@ -68,10 +58,7 @@ function InitScreen({ setShowJoin }: {
         >
           Create Team
         </Button>
-        <Button
-          onClick={() => setShowJoin(true)}
-          type='button'
-        >
+        <Button onClick={() => setShowJoin(true)} type='button'>
           Join Team
         </Button>
       </div>
@@ -79,22 +66,18 @@ function InitScreen({ setShowJoin }: {
   );
 }
 
-function TeamScreen({ onNext }: {
+function TeamScreen({
+  onNext,
+}: {
   onNext: MouseEventHandler<HTMLButtonElement>;
 }) {
   const { values, initialValues, setValues } = useForm('team');
   return (
     <>
-      <Typography
-        textColor='primary-3'
-        textType='heading2'
-        as='h2'
-      >
-        {
-          values.team.owner
-            ? 'Your team has been created!'
-            : 'You have joined a team!'
-        }
+      <Typography textColor='primary-3' textType='heading2' as='h2'>
+        {values.team.owner
+          ? 'Your team has been created!'
+          : 'You have joined a team!'}
       </Typography>
       <Typography
         className={styles.title}
@@ -110,12 +93,8 @@ function TeamScreen({ onNext }: {
         textType='heading4'
         as='ul'
       >
-        <li>
-          {values.team.code}
-        </li>
-        <li>
-          Teammates can join by entering the Team Code above.
-        </li>
+        <li>{values.team.code}</li>
+        <li>Teammates can join by entering the Team Code above.</li>
       </Typography>
       <Typography
         className={styles.title}
@@ -131,13 +110,9 @@ function TeamScreen({ onNext }: {
         textType='heading4'
         as='ul'
       >
-        {
-          values.team.members.map((member, key) => (
-            <li key={key}>
-              {member}
-            </li>
-          ))
-        }
+        {values.team.members.map((member, key) => (
+          <li key={key}>{member}</li>
+        ))}
       </Typography>
       <ApplicationFooter
         className={styles.footer}
@@ -160,41 +135,38 @@ function TeamScreen({ onNext }: {
         }}
       />
     </>
-  )
+  );
 }
 
-function JoinScreen({ setShowJoin }: {
+function JoinScreen({
+  setShowJoin,
+}: {
   setShowJoin: Dispatch<SetStateAction<boolean>>;
 }) {
-  const [ code, setCode ] = useState('');
+  const [code, setCode] = useState('');
   const { setFieldValue, defaultInputProps } = useForm('team');
   return (
     <>
-      <Typography
-        textColor='primary-3'
-        textType='heading2'
-        as='h2'
-      >
+      <Typography textColor='primary-3' textType='heading2' as='h2'>
         Join Team
       </Typography>
-      <Typography
-        textColor='copy-dark'
-        textType='heading4'
-        as='p'
-      >
+      <Typography textColor='copy-dark' textType='heading4' as='p'>
         Already have a code? Enter it below to join!
       </Typography>
       <div className={styles.join}>
         <Input
-          // Just to get the styling related stuff 
+          // Just to get the styling related stuff
           {...defaultInputProps('code')}
-          onChange={e => setCode(e.currentTarget.value)}
+          onChange={(e) => setCode(e.currentTarget.value)}
           placeholder='Enter team code'
           label='Team Code'
           value={code}
         />
         <Button
-          onClick={() => setFieldValue('team.code', code)}
+          onClick={() => {
+            setFieldValue('team.code', code);
+            setShowJoin(false);
+          }}
           className={styles.joinBtn}
           type='button'
         >
@@ -212,27 +184,31 @@ function JoinScreen({ setShowJoin }: {
   );
 }
 
-function TeamFormation({ onNext }: ApplicationFormSectionProps) {
-  const [ showJoin, setShowJoin ] = useState(false);
+function TeamFormation({
+  onNext,
+  onBack,
+  ...props
+}: ApplicationFormSectionProps) {
+  const [showJoin, setShowJoin] = useState(false);
   const { values } = useForm('team');
 
   return (
-    <ApplicationFormSection
-      className={cx(
-        showJoin && styles['root--left'],
-        styles.root,
+    <ApplicationFormSection {...props} name='Join Team'>
+      <div
+        className={cx(
+          sharedStyles['field--full-width'],
+          showJoin && styles['root--left'],
+          styles.root
         )}
-      name='Join Team'
-    >
-      {
-        values.team.code
-          ? <TeamScreen onNext={onNext} />
-          : (
-            showJoin
-              ? <JoinScreen setShowJoin={setShowJoin}/>
-              : <InitScreen setShowJoin={setShowJoin}/>
-          )
-      }
+      >
+        {values.team.code ? (
+          <TeamScreen onNext={onNext} />
+        ) : showJoin ? (
+          <JoinScreen setShowJoin={setShowJoin} />
+        ) : (
+          <InitScreen setShowJoin={setShowJoin} />
+        )}
+      </div>
     </ApplicationFormSection>
   );
 }

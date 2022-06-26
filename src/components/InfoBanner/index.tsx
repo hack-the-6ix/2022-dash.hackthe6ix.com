@@ -1,7 +1,7 @@
 import { FaTimes, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import { Colors } from '@ht6/react-ui/dist/styles';
 import { IconType } from 'react-icons';
-import { MouseEventHandler, ReactNode } from "react";
+import { MouseEventHandler, ReactNode } from 'react';
 import cx from 'classnames';
 import styles from './InfoBanner.module.scss';
 
@@ -9,7 +9,7 @@ export interface InfoBannerProps {
   onClose?: MouseEventHandler<HTMLButtonElement>;
   type: 'error' | 'success' | 'info';
   children: ReactNode;
-  className: string;
+  className?: string;
 }
 
 const typeToConfig: {
@@ -32,23 +32,24 @@ const typeToConfig: {
   },
 };
 
-function InfoBanner({ className, children, onClose, type, ...props }: InfoBannerProps) {
+function InfoBanner({
+  className,
+  children,
+  onClose,
+  type,
+  ...props
+}: InfoBannerProps) {
   const { icon: Icon, color } = typeToConfig[type];
   return (
     <div
       {...props}
-      className={cx(
-        styles[`root--c-${color}`],
-        styles.root,
-      )}
+      className={cx(styles[`root--c-${color}`], styles.root, className)}
     >
-      <Icon/>
-      <div>
-        {children}
-      </div>
+      <Icon className={styles.icon} />
+      <div>{children}</div>
       {onClose && (
-        <button onClick={onClose}>
-          <FaTimes/>
+        <button className={styles.close} onClick={onClose} type='button'>
+          <FaTimes className={styles.icon} />
         </button>
       )}
     </div>

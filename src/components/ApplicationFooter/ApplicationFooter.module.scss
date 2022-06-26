@@ -1,3 +1,4 @@
+@use '../../styles/mixins.module' as localMixins;
 @use '~@ht6/react-ui/dist/styles/colors.module';
 
 .root {
@@ -5,9 +6,17 @@
   grid-template-columns: auto auto;
   justify-content: space-between;
   padding-top: 1.5rem;
+  grid-gap: 0.5rem;
   display: grid;
 
   & button {
     text-transform: uppercase;
+  }
+
+  @include localMixins.media(tablet) {
+    grid-template-columns: 1fr;
+    & button {
+      width: 100%;
+    }
   }
 }

@@ -1,7 +1,15 @@
+@use '../../styles/mixins.module' as localMixins;
+
 .root {
   grid-template-columns: 1fr;
   box-sizing: border-box;
   padding: 3.75rem 0;
   grid-gap: 3.75rem;
   display: grid;
+}
+
+.label {
+  @include localMixins.media(tablet) {
+    display: none;
+  }
 }

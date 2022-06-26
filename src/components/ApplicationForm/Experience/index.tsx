@@ -1,50 +1,29 @@
-import { Input } from '@ht6/react-ui';
+import { Checkbox, Input } from '@ht6/react-ui';
 import cx from 'classnames';
-import { ApplicationFormSection, FormValuesType, useForm } from "..";
+import { omit } from 'lodash';
+import { ApplicationFormSection, FormValuesType, useForm } from '..';
 import ApplicationFooter from '../../ApplicationFooter';
 import sharedStyles from '../ApplicationForm.module.scss';
 import { ApplicationFormSectionProps } from '../types';
 
-export function validate(values: FormValuesType) {
+export function validate(values: FormValuesType) {}
 
-}
-
-function Experience(props: ApplicationFormSectionProps) {
-  const { defaultInputProps } = useForm('experience');
+function Experience({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
+  const { defaultInputProps } = useForm('experience', props.disabled);
   return (
-    <ApplicationFormSection
-      name='Your Experience'
-    >
-      <div
-        className={cx(
-          sharedStyles.placeholder,
-        )}
-      />
-      <div
-        className={cx(
-          sharedStyles.placeholder,
-        )}
-      />
-      <div
-        className={cx(
-          sharedStyles.placeholder,
-        )}
-      />
-      <div
-        className={cx(
-          sharedStyles.placeholder,
-        )}
-      />
-      <div
-        className={cx(
-          sharedStyles.placeholder,
-        )}
-      />
-      <div
+    <ApplicationFormSection {...props} name='Your Experience'>
+      <div className={cx(sharedStyles.placeholder)} />
+      <div className={cx(sharedStyles.placeholder)} />
+      <div className={cx(sharedStyles.placeholder)} />
+      <div className={cx(sharedStyles.placeholder)} />
+      <div className={cx(sharedStyles.placeholder)} />
+      <Checkbox
+        {...omit(defaultInputProps('canDistribute'), ['outlineColor'])}
+        label='I allow Hack the 6ix to distribute my resume to its event sponsors.'
+        color='primary-3'
         className={cx(
           sharedStyles['field--full-width'],
-          sharedStyles['field--break'],
-          sharedStyles.placeholder,
+          sharedStyles['field--break']
         )}
       />
       <Input
@@ -71,15 +50,15 @@ function Experience(props: ApplicationFormSectionProps) {
         className={sharedStyles.footer}
         leftAction={{
           children: 'Back',
-          onClick: props.onBack,
+          onClick: onBack,
         }}
         rightAction={{
           children: 'Save & Continue',
-          onClick: props.onNext,
+          onClick: onNext,
         }}
       />
     </ApplicationFormSection>
-  )
+  );
 }
 
 export default Experience;

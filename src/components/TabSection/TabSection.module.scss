@@ -1,3 +1,4 @@
+@use '../../styles/mixins.module' as localMixins;
 @use '~@ht6/react-ui/dist/styles/mixins.module';
 @use '~@ht6/react-ui/dist/styles/colors.module';
 
@@ -51,4 +52,8 @@
   box-sizing: border-box;
   padding: 5.75rem;
   z-index: 1;
+
+  @include localMixins.media(tablet) {
+    padding: 2.5rem;
+  }
 }

@@ -6,7 +6,7 @@ import Section from '../Section';
 import styles from './TabSection.module.scss';
 
 export type Tab = {
-  label: string;
+  label: ReactNode;
   element: ReactNode;
 };
 
@@ -26,7 +26,7 @@ function TabSection<T extends Tab>({
   tabs,
   ...props
 }: TabSectionProps<T>) {
-  const [ value ] = useTwoWayState(_value);
+  const [value] = useTwoWayState(_value);
   return (
     <Section
       {...props}
