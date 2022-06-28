@@ -1,15 +1,15 @@
 import { useFormikContext, Formik, FormikConfig } from 'formik';
 import { ReactNode, useCallback } from 'react';
-import { object } from 'yup';
+import { object, lazy } from 'yup';
 import cx from 'classnames';
 import InfoBanner, { InfoBannerProps } from '../InfoBanner';
 import styles from './ApplicationForm.module.scss';
 import { Colors } from '@ht6/react-ui/dist/styles';
 
-import { validate as aboutValidate } from './About';
-// import { validate as atHt6Validate} from './AtHt6';
-// import { validate as experienceValidate } from './Experience';
-// import { validate as teamFormationValidate } from './TeamFormation';
+import About from './About';
+import AtHt6 from './AtHt6';
+import Experience from './Experience';
+import TeamFormation from './TeamFormation';
 
 const initialValues = {
   team: {
@@ -121,12 +121,12 @@ export function ApplicationFormProvider({
   return (
     <Formik
       onSubmit={onSubmit}
-      validationSchema={object().shape({
-        // ...teamFormationValidate,
-        ...aboutValidate,
-        // ...experienceValidate,
-        // ...atHt6Validate,
-      })}
+      validationSchema={lazy(values => object().shape({
+          ...About.validate(values),
+          ...AtHt6.validate(values),
+          ...Experience.validate(values),
+          ...TeamFormation.validate(values),
+        }))}
       initialValues={initialValues}
     >
       {(props) => (

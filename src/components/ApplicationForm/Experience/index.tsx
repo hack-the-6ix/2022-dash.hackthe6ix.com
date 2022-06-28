@@ -6,8 +6,6 @@ import ApplicationFooter from '../../ApplicationFooter';
 import sharedStyles from '../ApplicationForm.module.scss';
 import { ApplicationFormSectionProps } from '../types';
 
-export function validate(values: FormValuesType) {}
-
 function Experience({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
   const { defaultInputProps } = useForm('experience', props.disabled);
   return (
@@ -60,5 +58,9 @@ function Experience({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
     </ApplicationFormSection>
   );
 }
+
+Experience.validate = (values: FormValuesType) => {
+  return {};
+};
 
 export default Experience;

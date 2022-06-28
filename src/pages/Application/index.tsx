@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { FC, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { fill, forEach } from 'lodash';
 import {
@@ -13,10 +13,15 @@ import Experience from '../../components/ApplicationForm/Experience';
 import TeamFormation from '../../components/ApplicationForm/TeamFormation';
 import { useConfig } from '../../components/Configuration/context';
 import HeadingSection from '../../components/HeadingSection';
-import TabSection from '../../components/TabSection';
+import TabSection, { Tab } from '../../components/TabSection';
 import styles from './Application.module.scss';
+import { ApplicationFormSectionProps } from '../../components/ApplicationForm/types';
 
-const tabs = [
+const tabs: (Omit<Tab, 'element'> & {
+  element: FC<ApplicationFormSectionProps>,
+  ref: keyof FormValuesType,
+  id: string,
+})[] = [
   {
     label: (
       <span>
@@ -25,6 +30,7 @@ const tabs = [
     ),
     element: TeamFormation,
     id: 'team-formation',
+    ref: 'team',
   },
   {
     label: (
@@ -34,6 +40,7 @@ const tabs = [
     ),
     element: About,
     id: 'about-you',
+    ref: 'about',
   },
   {
     label: (
@@ -43,6 +50,7 @@ const tabs = [
     ),
     element: Experience,
     id: 'your-experience',
+    ref: 'experience',
   },
   {
     label: (
@@ -52,6 +60,7 @@ const tabs = [
     ),
     element: AtHt6,
     id: 'at-ht6',
+    ref: 'at',
   },
 ];
 
@@ -66,9 +75,11 @@ function ApplicationContent() {
     return idx < 0 ? 0 : idx;
   });
   const navigate = useNavigate();
-  const { touched, setTouched, initialValues } = useForm();
+  const { touched, setTouched, errors, values, initialValues } = useForm();
+
   const touch = (idx: number) => {
     const section = Object.keys(initialValues)[idx] as keyof FormValuesType;
+    // Update all fields in section to be touched for errors to show
     const updatedTouched: { [field: string]: true } = {};
     forEach(initialValues[section], (_, key) => (updatedTouched[key] = true));
     setTouched({
@@ -84,6 +95,17 @@ function ApplicationContent() {
     navigate(`${location.pathname}#${tab.id}`, { replace: true });
     setSelected(idx);
   };
+
+  const generateMessages = (idx: number) => {
+    const tabHasError = tabs.map(tab => Object.values(errors[tab.ref] ?? {}).some(Boolean));
+    if (values.shippingInfo.isCanadian) {
+      tabHasError[0] ||= Object.values(errors.shippingInfo ?? {}).some(Boolean);
+    }
+
+    
+  }
+
+  console.log(errors);
 
   return (
     <TabSection

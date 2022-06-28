@@ -6,8 +6,6 @@ import ApplicationFooter from '../../ApplicationFooter';
 import sharedStyles from '../ApplicationForm.module.scss';
 import { ApplicationFormSectionProps } from '../types';
 
-export function validate(values: FormValuesType) {}
-
 function AtHt6({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
   const { defaultInputProps } = useForm('at', props.disabled);
   return (
@@ -110,5 +108,9 @@ function AtHt6({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
     </ApplicationFormSection>
   );
 }
+
+AtHt6.validate = (values: FormValuesType) => {
+  return {};
+};
 
 export default AtHt6;

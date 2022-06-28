@@ -8,8 +8,6 @@ import styles from './TeamFormation.module.scss';
 import ApplicationFooter from '../../ApplicationFooter';
 import { ApplicationFormSectionProps } from '../types';
 
-export function validate(values: FormValuesType) {}
-
 function InitScreen({
   setShowJoin,
 }: {
@@ -212,5 +210,9 @@ function TeamFormation({
     </ApplicationFormSection>
   );
 }
+
+TeamFormation.validate = (values: FormValuesType) => {
+  return {}
+};
 
 export default TeamFormation;
