@@ -212,7 +212,7 @@ function TeamFormation({
 }
 
 TeamFormation.validate = (values: FormValuesType) => {
-  return {}
+  return {};
 };
 
 export default TeamFormation;

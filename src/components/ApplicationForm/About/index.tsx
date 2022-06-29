@@ -113,7 +113,10 @@ function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
 }
 
 About.validate = (values: FormValuesType) => {
-  const validationSchema: { about: yup.AnySchema, shippingInfo?: yup.AnySchema } = {
+  const validationSchema: {
+    about: yup.AnySchema;
+    shippingInfo?: yup.AnySchema;
+  } = {
     about: yup.object().shape({
       firstName: yup.string().required("First Name can't be blank"),
       lastName: yup.string().required("Last Name can't be blank"),
@@ -191,15 +194,21 @@ About.validate = (values: FormValuesType) => {
 
   if (values.shippingInfo.isCanadian) {
     validationSchema.shippingInfo = yup.object().shape({
-      line1: yup.string().required('Address Line 1 can\'t be blank'),
-      line2: yup.string().required('Address Line 2 can\'t be blank'),
-      city: yup.string().required('City can\'t be blank'),
-      province: yup.string().required('Province can\'t be blank'),
-      postalCode: yup.string().matches(/^[A-Z]\d[A-Z]\d[A-Z]\d$/, 'Please provide a valid Postal Code (All caps)').required('Postal Code can\'t be blank'),
+      line1: yup.string().required("Address Line 1 can't be blank"),
+      line2: yup.string().required("Address Line 2 can't be blank"),
+      city: yup.string().required("City can't be blank"),
+      province: yup.string().required("Province can't be blank"),
+      postalCode: yup
+        .string()
+        .matches(
+          /^[A-Z]\d[A-Z]\d[A-Z]\d$/,
+          'Please provide a valid Postal Code (All caps)'
+        )
+        .required("Postal Code can't be blank"),
     });
   }
 
   return validationSchema;
-}
+};
 
 export default About;

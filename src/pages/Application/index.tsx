@@ -16,11 +16,13 @@ import HeadingSection from '../../components/HeadingSection';
 import TabSection, { Tab } from '../../components/TabSection';
 import styles from './Application.module.scss';
 import { ApplicationFormSectionProps } from '../../components/ApplicationForm/types';
+import Protected from '../../components/Authentication/Protected';
+import useAuth from '../../components/Authentication/context';
 
 const tabs: (Omit<Tab, 'element'> & {
-  element: FC<ApplicationFormSectionProps>,
-  ref: keyof FormValuesType,
-  id: string,
+  element: FC<ApplicationFormSectionProps>;
+  ref: keyof FormValuesType;
+  id: string;
 })[] = [
   {
     label: (
@@ -97,15 +99,15 @@ function ApplicationContent() {
   };
 
   const generateMessages = (idx: number) => {
-    const tabHasError = tabs.map(tab => Object.values(errors[tab.ref] ?? {}).some(Boolean));
+    const tabHasError = tabs.map((tab) =>
+      Object.values(errors[tab.ref] ?? {}).some(Boolean)
+    );
     if (values.shippingInfo.isCanadian) {
       tabHasError[0] ||= Object.values(errors.shippingInfo ?? {}).some(Boolean);
     }
+  };
 
-    
-  }
-
-  console.log(errors);
+  console.log(errors, generateMessages(0));
 
   return (
     <TabSection
@@ -143,7 +145,9 @@ function ApplicationContent() {
 }
 
 function Application() {
+  const { revokeAuth } = useAuth();
   const { endDate } = useConfig();
+  const navigate = useNavigate();
   const formattedDate = new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',
@@ -157,20 +161,26 @@ function Application() {
   }).format(endDate);
 
   return (
-    <main className={styles.root}>
-      <HeadingSection
-        title='Hacker Application'
-        description={`Applications close on ${formattedDate} at ${formattedTime}.
-          Your progress is saved every few minutes. Once you've submitted
-          your application, keep an eye on your inbox for your application results!`}
-        action={{
-          children: 'Sign Out',
-        }}
-      />
-      <ApplicationFormProvider onSubmit={() => console.log('owo')}>
-        <ApplicationContent />
-      </ApplicationFormProvider>
-    </main>
+    <Protected>
+      <main className={styles.root}>
+        <HeadingSection
+          title='Hacker Application'
+          description={`Applications close on ${formattedDate} at ${formattedTime}.
+            Your progress is saved every few minutes. Once you've submitted
+            your application, keep an eye on your inbox for your application results!`}
+          action={{
+            onClick: async () => {
+              await revokeAuth();
+              navigate('/');
+            },
+            children: 'Sign Out',
+          }}
+        />
+        <ApplicationFormProvider onSubmit={() => console.log('owo')}>
+          <ApplicationContent />
+        </ApplicationFormProvider>
+      </main>
+    </Protected>
   );
 }
 

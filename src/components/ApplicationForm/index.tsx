@@ -121,12 +121,14 @@ export function ApplicationFormProvider({
   return (
     <Formik
       onSubmit={onSubmit}
-      validationSchema={lazy(values => object().shape({
+      validationSchema={lazy((values) =>
+        object().shape({
           ...About.validate(values),
           ...AtHt6.validate(values),
           ...Experience.validate(values),
           ...TeamFormation.validate(values),
-        }))}
+        })
+      )}
       initialValues={initialValues}
     >
       {(props) => (

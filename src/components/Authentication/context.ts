@@ -1,11 +1,43 @@
 import { createContext, useContext } from 'react';
 
 // TODO: User typing as needed
-export type User = any;
+export type User = {
+  computedApplicationDeadline: number;
+  computedRSVPDeadline: number;
+  created: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  hackerApplication: any; // TODO: Typing for this
+  roles: {
+    hacker: boolean;
+    admin: boolean;
+    organizer: boolean;
+    volunteer: boolean;
+  };
+  status: {
+    textStatus: string;
+    accepted: boolean;
+    applicationExpired: boolean;
+    applied: boolean;
+    canAmendTeam: boolean;
+    canApply: boolean;
+    canRSVP: boolean;
+    checkedIn: boolean;
+    confirmed: boolean;
+    declined: boolean;
+    isRSVPOpen: boolean;
+    rejected: boolean;
+    rsvpExpired: boolean;
+    waitlisted: boolean;
+  };
+  _id: string;
+};
 
 export type BaseAuthContext = {
   setAuth: (token: string, refreshToken: string) => Promise<void>;
-  refreshAuth: () => Promise<string | void>;
+  refreshAuth: () => Promise<{ token: string; refreshToken: string } | void>;
   revokeAuth: () => Promise<void>;
   isReady: boolean;
 };
@@ -43,7 +75,7 @@ export const AuthenticationContext = createContext<AuthContext>({
   isAuthenticating: false,
   isAuthenticated: false,
   isRefreshing: false,
-  isReady: false,
+  isReady: true,
 });
 
 export function useAuth() {
