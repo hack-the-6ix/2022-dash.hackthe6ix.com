@@ -1,4 +1,4 @@
-import { Checkbox, Input } from '@ht6/react-ui';
+import { Checkbox, Input, Textarea, FileUpload } from '@ht6/react-ui';
 import cx from 'classnames';
 import { omit } from 'lodash';
 import { ApplicationFormSection, FormValuesType, useForm } from '..';
@@ -7,14 +7,24 @@ import sharedStyles from '../ApplicationForm.module.scss';
 import { ApplicationFormSectionProps } from '../types';
 
 function Experience({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
-  const { defaultInputProps } = useForm('experience', props.disabled);
+  const { defaultInputProps, setFieldValue } = useForm(
+    'experience',
+    props.disabled
+  );
   return (
     <ApplicationFormSection {...props} name='Your Experience'>
       <div className={cx(sharedStyles.placeholder)} />
       <div className={cx(sharedStyles.placeholder)} />
       <div className={cx(sharedStyles.placeholder)} />
       <div className={cx(sharedStyles.placeholder)} />
-      <div className={cx(sharedStyles.placeholder)} />
+      <FileUpload
+        {...defaultInputProps('resume')}
+        onChange={(e) => {
+          setFieldValue('experience.resume', e.currentTarget.files);
+        }}
+        label='Your Resume'
+        required
+      />
       <Checkbox
         {...omit(defaultInputProps('canDistribute'), ['outlineColor'])}
         label='I allow Hack the 6ix to distribute my resume to its event sponsors.'
@@ -43,6 +53,17 @@ function Experience({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
         placeholder='Ex. https://linkedin.com/fpunny'
         label='LinkedIn'
         type='url'
+      />
+      <Textarea
+        {...defaultInputProps('project')}
+        label='Describe a project that you are proud of and explain the impact it had.'
+        className={cx(
+          sharedStyles['field--full-width'],
+          sharedStyles['field--break']
+        )}
+        limit={200}
+        required
+        rows={5}
       />
       <ApplicationFooter
         className={sharedStyles.footer}

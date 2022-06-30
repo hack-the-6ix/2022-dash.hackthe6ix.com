@@ -1,4 +1,4 @@
-import { Checkbox } from '@ht6/react-ui';
+import { Checkbox, Textarea } from '@ht6/react-ui';
 import cx from 'classnames';
 import { omit } from 'lodash';
 import { ApplicationFormSection, FormValuesType, useForm } from '..';
@@ -16,17 +16,21 @@ function AtHt6({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
           sharedStyles.placeholder
         )}
       />
-      <div
-        className={cx(
-          sharedStyles['field--full-width'],
-          sharedStyles.placeholder
-        )}
+      <Textarea
+        {...defaultInputProps('accompolish')}
+        className={cx(sharedStyles['field--full-width'])}
+        label='What would you like to accomplish at Hack the 6ix?'
+        limit={200}
+        required
+        rows={5}
       />
-      <div
-        className={cx(
-          sharedStyles['field--full-width'],
-          sharedStyles.placeholder
-        )}
+      <Textarea
+        {...defaultInputProps('explore')}
+        className={cx(sharedStyles['field--full-width'])}
+        label='Describe a technology/innovcation that you are excited to explore in the future.'
+        limit={200}
+        required
+        rows={5}
       />
       <Checkbox
         {...omit(defaultInputProps('mlh'), ['outlineColor'])}
