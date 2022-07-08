@@ -1,13 +1,15 @@
-import { Checkbox, Input, Typography } from '@ht6/react-ui';
+import { Checkbox, Dropdown, Input, Typography } from '@ht6/react-ui';
 import cx from 'classnames';
 import * as yup from 'yup';
 import { omit } from 'lodash';
-import { ApplicationFormSection, FormValuesType, useForm } from '..';
+import { ApplicationFormSection } from '..';
 import ApplicationFooter from '../../ApplicationFooter';
-import sharedStyles from '../ApplicationForm.module.scss';
+import { useForm, FormValuesType, useApplicationData } from '../context';
 import { ApplicationFormSectionProps } from '../types';
+import sharedStyles from '../ApplicationForm.module.scss';
 
 function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
+  const { enums } = useApplicationData();
   const { defaultInputProps: shippingInfoInputProps } = useForm('shippingInfo');
   const { defaultInputProps: aboutInputProps, values } = useForm(
     'about',
@@ -40,12 +42,43 @@ function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
         color='primary-3'
         className={cx(sharedStyles['field--full-width'])}
       />
-      <div className={cx(sharedStyles.placeholder)} />
-      <div
-        className={cx(sharedStyles['field--break'], sharedStyles.placeholder)}
+      <Dropdown
+        {...omit(aboutInputProps('gender'), ['outlineColor'])}
+        label='Gender'
+        options={enums.gender.map((label) => ({
+          value: label,
+          label,
+        }))}
+        required
       />
-      <div className={cx(sharedStyles.placeholder)} />
-      <div className={cx(sharedStyles.placeholder)} />
+      <Dropdown
+        {...omit(aboutInputProps('ethnicity'), ['outlineColor'])}
+        className={sharedStyles['field--break']}
+        label='Ethinicity'
+        options={enums.ethnicity.map((label) => ({
+          value: label,
+          label,
+        }))}
+        required
+      />
+      <Dropdown
+        {...omit(aboutInputProps('timezone'), ['outlineColor'])}
+        label='Your Timezone'
+        options={enums.timezone.map((label) => ({
+          value: label,
+          label,
+        }))}
+        required
+      />
+      <Dropdown
+        {...omit(aboutInputProps('size'), ['outlineColor'])}
+        label='Shirt Size'
+        options={enums.shirt.map((label) => ({
+          value: label,
+          label,
+        }))}
+        required
+      />
       <Checkbox
         {...omit(shippingInfoInputProps('isCanadian'), ['outlineColor'])}
         label={
@@ -91,7 +124,15 @@ function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
             label='City'
             required
           />
-          <div className={cx(sharedStyles.placeholder)} />
+          <Dropdown
+            {...omit(shippingInfoInputProps('province'), ['outlineColor'])}
+            label='Province'
+            options={enums.province.map((label) => ({
+              value: label,
+              label,
+            }))}
+            required
+          />
           <Input
             {...shippingInfoInputProps('postalCode')}
             placeholder='Ex. V4Q3H9'
@@ -125,66 +166,9 @@ About.validate = (values: FormValuesType) => {
         .email('Please provide a valid email.')
         .required("Email can't be blank"),
       canEmail: yup.boolean(),
-      gender: yup
-        .string()
-        .oneOf(['Male', 'Female', 'Other', 'Prefer not to respond'])
-        .required("Gender can't be blank"),
-      ethnicity: yup
-        .string()
-        .oneOf([
-          'American Indian or Alaska Native',
-          'Asian',
-          'Black or African American',
-          'Hispanic or Latino',
-          'White',
-          'Prefer not to respond',
-        ])
-        .required("Ethnicity can't be blank"),
-      timezone: yup
-        .string()
-        .oneOf([
-          '(GMT -12:00) Eniwetok, Kwajalein',
-          '(GMT -11:00) Midway Island, Samoa',
-          '(GMT -10:00) Hawaii',
-          '(GMT -9:30) Taiohae',
-          '(GMT -9:00) Alaska',
-          '(GMT -8:00) Pacific Time (US &amp; Canada)',
-          '(GMT -7:00) Mountain Time (US &amp; Canada)',
-          '(GMT -6:00) Central Time (US &amp; Canada), Mexico City',
-          '(GMT -5:00) Eastern Time (US &amp; Canada), Bogota, Lima',
-          '(GMT -4:30) Caracas',
-          '(GMT -4:00) Atlantic Time (Canada), Caracas, La Paz',
-          '(GMT -3:30) Newfoundland',
-          '(GMT -3:00) Brazil, Buenos Aires, Georgetown',
-          '(GMT -2:00) Mid-Atlantic',
-          '(GMT -1:00) Azores, Cape Verde Islands',
-          '(GMT) Western Europe Time, London, Lisbon, Casablanca',
-          '(GMT +1:00) Brussels, Copenhagen, Madrid, Paris',
-          '(GMT +2:00) Kaliningrad, South Africa',
-          '(GMT +3:00) Baghdad, Riyadh, Moscow, St. Petersburg',
-          '(GMT +3:30) Tehran',
-          '(GMT +4:00) Abu Dhabi, Muscat, Baku, Tbilisi',
-          '(GMT +4:30) Kabul',
-          '(GMT +5:00) Ekaterinburg, Islamabad, Karachi, Tashkent',
-          '(GMT +5:30) Bombay, Calcutta, Madras, New Delhi',
-          '(GMT +5:45) Kathmandu, Pokhara',
-          '(GMT +6:00) Almaty, Dhaka, Colombo',
-          '(GMT +6:30) Yangon, Mandalay',
-          '(GMT +7:00) Bangkok, Hanoi, Jakarta',
-          '(GMT +8:00) Beijing, Perth, Singapore, Hong Kong',
-          '(GMT +8:45) Eucla',
-          '(GMT +9:00) Tokyo, Seoul, Osaka, Sapporo, Yakutsk',
-          '(GMT +9:30) Adelaide, Darwin',
-          '(GMT +10:00) Eastern Australia, Guam, Vladivostok',
-          '(GMT +10:30) Lord Howe Island',
-          '(GMT +11:00) Magadan, Solomon Islands, New Caledonia',
-          '(GMT +11:30) Norfolk Island',
-          '(GMT +12:00) Auckland, Wellington, Fiji, Kamchatka',
-          '(GMT +12:45) Chatham Islands',
-          '(GMT +13:00) Apia, Nukualofa',
-          '(GMT +14:00) Line Islands, Tokelau',
-        ])
-        .required("Timezone can't be blank"),
+      gender: yup.string().required("Gender can't be blank"),
+      ethnicity: yup.string().required("Ethnicity can't be blank"),
+      timezone: yup.string().required("Timezone can't be blank"),
       size: yup
         .string()
         .oneOf(['XS', 'S', 'M', 'L', 'XL'])

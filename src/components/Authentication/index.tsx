@@ -1,8 +1,9 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import {
-  TokenController,
-  useRequest,
+  abortRequest,
+  request,
   ServerResponse,
+  TokenController,
 } from '../../utils/useRequest';
 import {
   AuthenticatedAuthContext,
@@ -38,59 +39,29 @@ export default function AuthenticationProvider({
     }
   });
 
-  const { makeRequest: refresh } = useRequest<
-    ServerResponse<{
-      refreshToken: string;
-      token: string;
-    }>
-  >(`/auth/${process.env.REACT_APP_API_AUTH_PROVIDER}/refresh`, {
-    useLocalStorage: true,
-  });
-  const { makeRequest: logout } = useRequest(
-    `/auth/${process.env.REACT_APP_API_AUTH_PROVIDER}/logout`,
-    { useLocalStorage: true }
-  );
-  const { makeRequest: getProfile, abort: cancelGetProfile } = useRequest(
-    '/api/action/profile',
-    { useLocalStorage: true }
-  );
   const _state = useRef(state);
   _state.current = state;
-
-  useEffect(() => {
-    if (!state.isAuthenticating) return;
-    let mounted = true;
-
-    // TODO: Add fetch request for user
-    getProfile().then((res) => {
-      console.log(res);
-      if (!mounted) return;
-      // @ts-ignore
-      setState((_state) => ({
-        ..._state,
-        isAuthenticating: false,
-        isAuthenticated: true,
-        user: {},
-      }));
-    });
-    return () => {
-      mounted = false;
-    };
-  }, [getProfile, state.isAuthenticating]);
 
   const revokeAuth = useCallback(async () => {
     if (_state.current.isAuthenticating) {
       console.warn('User authentication in progress. Cancelling...');
-      cancelGetProfile();
+      abortRequest('authentication__profile');
     }
 
     if (_state.current.isAuthenticated) {
-      await logout({
-        method: 'POST',
-        body: JSON.stringify({
-          refreshToken: _state.current.refreshToken,
-        }),
-      });
+      await request(
+        `/auth/${process.env.REACT_APP_API_AUTH_PROVIDER}/logout`,
+        {
+          method: 'POST',
+          headers: {
+            'x-access-token': _state.current.token,
+          },
+          body: JSON.stringify({
+            refreshToken: _state.current.refreshToken,
+          }),
+        },
+        'authentication__logout'
+      );
     }
 
     TokenController.clear();
@@ -99,7 +70,37 @@ export default function AuthenticationProvider({
       isAuthenticated: false,
       isRefreshing: false,
     });
-  }, [cancelGetProfile, logout]);
+  }, []);
+
+  const refreshAuth = useCallback(async () => {
+    const { token, refreshToken } = _state.current as any;
+    const res = await request(
+      `/auth/${process.env.REACT_APP_API_AUTH_PROVIDER}/refresh`,
+      {
+        method: 'POST',
+        headers: {
+          'x-access-token': token,
+        },
+        body: JSON.stringify({
+          refreshToken: refreshToken,
+        }),
+      },
+      'authentication__refresh'
+    );
+
+    if (res?.status !== 200) {
+      console.warn('Unable to refresh auth. Logging user out');
+      await revokeAuth();
+      return;
+    }
+
+    const payload: ServerResponse<{ refreshToken: string; token: string }> =
+      await res.json();
+
+    TokenController.set(payload.message);
+    setState((_state) => ({ ..._state, ...payload.message }));
+    return payload.message;
+  }, [revokeAuth]);
 
   const setAuth = useCallback(
     async (token: string, refreshToken: string) => {
@@ -118,34 +119,45 @@ export default function AuthenticationProvider({
     [revokeAuth]
   );
 
-  const refreshAuth = useCallback(async () => {
-    if (_state.current.isAuthenticating) {
-      console.warn('User authentication in progress. Is this a mistake?');
-      return;
-    }
+  const { isAuthenticating, refreshToken, token } = state as any;
+  useEffect(() => {
+    if (!isAuthenticating) return;
 
-    if (!_state.current.isAuthenticated) {
-      console.warn('User is not authenticated. There is nothing to refresh...');
-      return;
-    }
+    // TODO: Add fetch request for user
+    (async () => {
+      const run = (token?: string) =>
+        request(
+          '/api/action/profile',
+          token
+            ? {
+                headers: {
+                  'x-access-token': token,
+                },
+              }
+            : {},
+          'authentication__profile'
+        );
+      let res = await run(token);
+      if (res.status === 401) {
+        const { token } = (await refreshAuth()) ?? {};
+        res = await run(token);
+      }
 
-    const res = await refresh({
-      method: 'POST',
-      body: JSON.stringify({
-        refreshToken: _state.current?.refreshToken,
-      }),
-    });
+      const data = await res.json();
+      setState((_state) => ({
+        ..._state,
+        isAuthenticating: false,
+        isAuthenticated: true,
+        user: data.message,
+        refreshToken,
+        token,
+      }));
+    })();
 
-    if (res?.status !== 200) {
-      console.warn('Unable to refresh auth. Logging user out');
-      await revokeAuth();
-      return;
-    }
-
-    TokenController.set(res.message);
-    setState((_state) => ({ ..._state, ...res.message }));
-    return res.message;
-  }, [refresh, revokeAuth]);
+    return () => {
+      abortRequest('authentication__profile');
+    };
+  }, [refreshAuth, isAuthenticating, refreshToken, token]);
 
   return (
     <AuthenticationContext.Provider

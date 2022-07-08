@@ -4,8 +4,6 @@ import { fill, forEach } from 'lodash';
 import {
   ApplicationFormMessage,
   ApplicationFormProvider,
-  FormValuesType,
-  useForm,
 } from '../../components/ApplicationForm';
 import About from '../../components/ApplicationForm/About';
 import AtHt6 from '../../components/ApplicationForm/AtHt6';
@@ -14,10 +12,14 @@ import TeamFormation from '../../components/ApplicationForm/TeamFormation';
 import { useConfig } from '../../components/Configuration/context';
 import HeadingSection from '../../components/HeadingSection';
 import TabSection, { Tab } from '../../components/TabSection';
-import styles from './Application.module.scss';
 import { ApplicationFormSectionProps } from '../../components/ApplicationForm/types';
 import Protected from '../../components/Authentication/Protected';
 import useAuth from '../../components/Authentication/context';
+import {
+  FormValuesType,
+  useForm,
+} from '../../components/ApplicationForm/context';
+import styles from './Application.module.scss';
 
 const tabs: (Omit<Tab, 'element'> & {
   element: FC<ApplicationFormSectionProps>;
@@ -107,7 +109,7 @@ function ApplicationContent() {
     }
   };
 
-  console.log(errors, generateMessages(0));
+  console.log(values, generateMessages(0));
 
   return (
     <TabSection

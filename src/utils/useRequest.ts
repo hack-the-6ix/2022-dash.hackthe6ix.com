@@ -30,20 +30,29 @@ export class TokenController {
   }
 }
 
-export function request(path: string, payload?: RequestInit) {
+const controllers: { [ref: string]: AbortController } = {};
+export function abortRequest(ref: string) {
+  controllers[ref]?.abort();
+}
+export function request(path: string, payload?: RequestInit, ref?: string) {
+  if (ref) {
+    abortRequest(ref);
+    controllers[ref] = new AbortController();
+  }
+
   return fetch(`${process.env.REACT_APP_API_URL}${path ?? ''}`, {
     ...payload,
     headers: {
       ...payload?.headers,
       'content-type': 'application/json',
     },
+    signal: ref ? controllers[ref]?.signal : null,
   });
 }
 
 type UseRequestOptions<T> = {
   payload?: RequestInit;
   debounce?: boolean;
-  useLocalStorage?: boolean;
   initData?: T;
 };
 
@@ -57,7 +66,7 @@ export function useRequest<T>(
   path: string,
   options: UseRequestOptions<T> = {}
 ) {
-  const { useLocalStorage, initData, payload, debounce = true } = options;
+  const { initData, payload, debounce = true } = options;
   const controller = useRef<AbortController>();
   const authContext = useAuth();
 
@@ -71,25 +80,24 @@ export function useRequest<T>(
     ...authContext,
   });
 
+  requestCtx.current = {
+    isLoading: state.isLoading,
+    ...authContext,
+  };
+
   const makeRequest = useCallback(
     async (_payload?: RequestInit) => {
       // Clean up stuff
       if (requestCtx.current.isLoading) {
         console.warn(`Request to ${path} is already in progress`);
         if (debounce) return;
-        controller.current?.abort();
       }
+
+      controller.current?.abort();
 
       // Setup request overhead stuff
       controller.current = new AbortController();
       setState({ isLoading: true });
-
-      let token: string | undefined;
-      if (useLocalStorage) {
-        token = TokenController.get().token;
-      } else if (requestCtx.current.isAuthenticated) {
-        token = requestCtx.current.token;
-      }
 
       const run = () =>
         request(path, {
@@ -98,7 +106,11 @@ export function useRequest<T>(
           headers: {
             ...payload?.headers,
             ..._payload?.headers,
-            ...(token ? { 'x-access-token': token } : {}),
+            ...(requestCtx.current.isAuthenticated
+              ? {
+                  'x-access-token': requestCtx.current.token,
+                }
+              : {}),
           },
           signal: controller.current?.signal,
         });
@@ -120,7 +132,7 @@ export function useRequest<T>(
 
       return _data as T;
     },
-    [debounce, path, payload, useLocalStorage]
+    [debounce, path, payload]
   );
 
   const abort = useCallback(() => {

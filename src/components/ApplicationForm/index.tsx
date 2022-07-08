@@ -1,114 +1,18 @@
-import { useFormikContext, Formik, FormikConfig } from 'formik';
-import { ReactNode, useCallback } from 'react';
+import { Formik, FormikConfig } from 'formik';
+import { ReactNode } from 'react';
 import { object, lazy } from 'yup';
 import cx from 'classnames';
 import InfoBanner, { InfoBannerProps } from '../InfoBanner';
-import styles from './ApplicationForm.module.scss';
-import { Colors } from '@ht6/react-ui/dist/styles';
-
 import About from './About';
 import AtHt6 from './AtHt6';
 import Experience from './Experience';
 import TeamFormation from './TeamFormation';
-
-const initialValues = {
-  team: {
-    code: '',
-    members: [] as string[],
-    owner: false,
-  },
-  about: {
-    firstName: '',
-    lastName: '',
-    email: '',
-    canEmail: false,
-    gender: '',
-    ethnicity: '',
-    timezone: '',
-    size: '',
-  },
-  shippingInfo: {
-    isCanadian: false,
-    line1: '',
-    line2: '',
-    city: '',
-    province: '',
-    postalCode: '',
-  },
-  experience: {
-    school: '',
-    study: '',
-    year: '',
-    hackathons: '',
-    resume: null,
-    canDistribute: false,
-    github: '',
-    portfolio: '',
-    linkedin: '',
-    project: '',
-  },
-  at: {
-    interest: [] as string[],
-    accompolish: '',
-    explore: '',
-    mlh: false,
-    mlhEmail: false,
-    mlhShare: false,
-  },
-};
-
-export type FormValuesType = typeof initialValues;
-
-export function useForm<T extends keyof FormValuesType>(
-  section?: T,
-  disabled?: boolean
-) {
-  const formikContext = useFormikContext<FormValuesType>();
-  const defaultInputProps = useCallback(
-    (
-      field: T extends never ? keyof FormValuesType : keyof FormValuesType[T]
-    ) => {
-      const name = section ? `${section}.${String(field)}` : field;
-      let error, touched;
-      if (section) {
-        // @ts-ignore
-        error = formikContext.errors[section]?.[field];
-        // @ts-ignore
-        touched = formikContext.touched[section]?.[field];
-      }
-      return {
-        // @ts-ignore
-        value: formikContext.values[section][field],
-        onChange: formikContext.handleChange,
-        onBlur: formikContext.handleBlur,
-        outlineColor: 'primary-3' as Colors,
-        status:
-          error && touched
-            ? {
-                state: 'error' as const,
-                text: error,
-              }
-            : undefined,
-        disabled,
-        name,
-      };
-    },
-    [
-      formikContext.handleChange,
-      formikContext.handleBlur,
-      formikContext.touched,
-      formikContext.errors,
-      formikContext.values,
-      disabled,
-      section,
-    ]
-  );
-
-  return {
-    ...formikContext,
-    defaultInputProps,
-  };
-}
+import {
+  ApplicationDataProvider,
+  FormValuesType,
+  initialValues,
+} from './context';
+import styles from './ApplicationForm.module.scss';
 
 interface ApplicationFormProviderProps {
   onSubmit: FormikConfig<FormValuesType>['onSubmit'];
@@ -119,24 +23,26 @@ export function ApplicationFormProvider({
   onSubmit,
 }: ApplicationFormProviderProps) {
   return (
-    <Formik
-      onSubmit={onSubmit}
-      validationSchema={lazy((values) =>
-        object().shape({
-          ...About.validate(values),
-          ...AtHt6.validate(values),
-          ...Experience.validate(values),
-          ...TeamFormation.validate(values),
-        })
-      )}
-      initialValues={initialValues}
-    >
-      {(props) => (
-        <form onSubmit={props.handleSubmit} noValidate>
-          {children}
-        </form>
-      )}
-    </Formik>
+    <ApplicationDataProvider>
+      <Formik
+        onSubmit={onSubmit}
+        validationSchema={lazy((values) =>
+          object().shape({
+            ...About.validate(values),
+            ...AtHt6.validate(values),
+            ...Experience.validate(values),
+            ...TeamFormation.validate(values),
+          })
+        )}
+        initialValues={initialValues}
+      >
+        {(props) => (
+          <form onSubmit={props.handleSubmit} noValidate>
+            {children}
+          </form>
+        )}
+      </Formik>
+    </ApplicationDataProvider>
   );
 }
 

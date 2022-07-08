@@ -1,23 +1,55 @@
-import { Checkbox, Textarea } from '@ht6/react-ui';
+import { Checkbox, InputLayout, Textarea } from '@ht6/react-ui';
 import cx from 'classnames';
 import { omit } from 'lodash';
-import { ApplicationFormSection, FormValuesType, useForm } from '..';
+import { ApplicationFormSection } from '..';
 import ApplicationFooter from '../../ApplicationFooter';
-import sharedStyles from '../ApplicationForm.module.scss';
+import { useForm, FormValuesType, useApplicationData } from '../context';
 import { ApplicationFormSectionProps } from '../types';
+import sharedStyles from '../ApplicationForm.module.scss';
+import styles from './AtHt6.module.scss';
 
 function AtHt6({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
-  const { defaultInputProps } = useForm('at', props.disabled);
+  const { defaultInputProps, setFieldValue, values } = useForm(
+    'at',
+    props.disabled
+  );
+  const { enums } = useApplicationData();
+
   return (
     <ApplicationFormSection {...props} name='Your Experience'>
-      <div
-        className={cx(
-          sharedStyles['field--full-width'],
-          sharedStyles.placeholder
-        )}
-      />
+      <InputLayout
+        className={sharedStyles['field--full-width']}
+        label='Please choose 3 workshops that you are interested in'
+        name='at.interest'
+      >
+        <div className={styles.workshops}>
+          {enums.requestedWorkshops.map((workshop, key) => (
+            <Checkbox
+              {...omit(defaultInputProps('interest'), ['outlineColor'])}
+              checked={values.at.interest.includes(workshop) as any}
+              onChange={(e) => {
+                const isChecked = e.currentTarget.checked;
+                const newValue = values.at.interest.filter(
+                  (i) => i !== workshop
+                );
+                setFieldValue(
+                  'at.interest',
+                  isChecked ? [...newValue, workshop] : newValue
+                );
+              }}
+              disabled={
+                !values.at.interest.includes(workshop) &&
+                values.at.interest.length >= 3
+              }
+              label={workshop}
+              color='primary-3'
+              key={key}
+            />
+          ))}
+        </div>
+      </InputLayout>
       <Textarea
-        {...defaultInputProps('accompolish')}
+        {...omit(defaultInputProps('accompolish'), ['outlineColor'])}
         className={cx(sharedStyles['field--full-width'])}
         label='What would you like to accomplish at Hack the 6ix?'
         limit={200}
@@ -25,7 +57,7 @@ function AtHt6({ onBack, onNext, ...props }: ApplicationFormSectionProps) {
         rows={5}
       />
       <Textarea
-        {...defaultInputProps('explore')}
+        {...omit(defaultInputProps('explore'), ['outlineColor'])}
         className={cx(sharedStyles['field--full-width'])}
         label='Describe a technology/innovcation that you are excited to explore in the future.'
         limit={200}
