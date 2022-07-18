@@ -1,4 +1,5 @@
 import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { merge } from 'lodash';
 import {
   abortRequest,
   request,
@@ -9,6 +10,7 @@ import {
   AuthenticatedAuthContext,
   UnAuthenticatedAuthContext,
   AuthenticationContext,
+  User,
 } from './context';
 
 export interface AuthenticationProviderProps {
@@ -119,6 +121,19 @@ export default function AuthenticationProvider({
     [revokeAuth]
   );
 
+  const updateUserApplication = useCallback(
+    (payload: Partial<Pick<User, 'hackerApplication' | 'status'>>) => {
+      setState((s) => {
+        if (!s.isAuthenticated) {
+          console.warn('No user session found. Unable to update application');
+          return s;
+        }
+        return { ...s, user: merge(s.user, payload) };
+      });
+    },
+    []
+  );
+
   const { isAuthenticating, refreshToken, token } = state as any;
   useEffect(() => {
     if (!isAuthenticating) return;
@@ -164,6 +179,7 @@ export default function AuthenticationProvider({
       value={{
         ...state,
         isReady: !state.isAuthenticating && !state.isRefreshing,
+        updateUserApplication,
         refreshAuth,
         revokeAuth,
         setAuth,

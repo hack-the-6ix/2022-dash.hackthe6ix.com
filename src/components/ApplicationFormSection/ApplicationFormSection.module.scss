@@ -1,5 +1,3 @@
-@use '~@ht6/react-ui/dist/styles/mixins.module';
-@use '~@ht6/react-ui/dist/styles/colors.module';
 @use '../../styles/mixins.module' as localMixins;
 @use '../../styles/vars.module';
 
@@ -32,29 +30,5 @@
 
   &--break {
     grid-column-start: 1;
-  }
-}
-
-.items {
-  grid-template-columns: 1fr;
-  list-style-type: none;
-  grid-gap: 0.75rem;
-  display: grid;
-  padding: 0;
-  margin: 0;
-}
-
-.link {
-  @include mixins.transition(color);
-  color: colors.getColor(primary-1);
-  text-decoration: none;
-
-  &:hover,
-  &:focus {
-    color: colors.getColor(primary-1, hover);
-  }
-
-  &:active {
-    color: colors.getColor(primary-1, active);
   }
 }

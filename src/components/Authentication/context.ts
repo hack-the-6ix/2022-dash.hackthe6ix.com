@@ -36,6 +36,9 @@ export type User = {
 };
 
 export type BaseAuthContext = {
+  updateUserApplication: (
+    payload: Partial<Pick<User, 'hackerApplication' | 'status'>>
+  ) => void;
   setAuth: (token: string, refreshToken: string) => Promise<void>;
   refreshAuth: () => Promise<{ token: string; refreshToken: string } | void>;
   revokeAuth: () => Promise<void>;
@@ -69,6 +72,7 @@ export type AuthContext = BaseAuthContext &
   (AuthenticatedAuthContext | UnAuthenticatedAuthContext);
 
 export const AuthenticationContext = createContext<AuthContext>({
+  updateUserApplication: async () => {},
   refreshAuth: async () => {},
   revokeAuth: async () => {},
   setAuth: async () => {},

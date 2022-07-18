@@ -1,37 +1,49 @@
 import { Button, Input, Typography } from '@ht6/react-ui';
 import {
+  createContext,
   Dispatch,
-  MouseEventHandler,
   SetStateAction,
+  useContext,
   useEffect,
   useState,
 } from 'react';
 import cx from 'classnames';
-import { ApplicationFormSection } from '..';
 import { useConfig } from '../../Configuration/context';
-import { useForm, FormValuesType } from '../context';
-import { ApplicationFormSectionProps } from '../types';
-import ApplicationFooter from '../../ApplicationFooter';
+import ApplicationFooter, {
+  ApplicationFooterProps,
+} from '../../ApplicationFooter';
 import sharedStyles from '../ApplicationForm.module.scss';
 import styles from './TeamFormation.module.scss';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
-import useAuth, {
-  AuthenticatedAuthContext,
-} from '../../Authentication/context';
+import useAuth from '../../Authentication/context';
 
-type TeamServerResponse = ServerResponse<{
+type Team = {
   code: string;
   memberNames: string[];
-}>;
+};
 
-function InitScreen({
-  setShowJoin,
-}: {
+type TeamServerResponse = ServerResponse<Team>;
+
+interface TeamFormationProps {
+  onNext: Omit<ApplicationFooterProps['rightAction'], 'children'>;
+}
+
+const TeamContext = createContext<{
+  team: Team | null;
+  setTeam: Dispatch<SetStateAction<Team | null>>;
+  showJoin: boolean;
   setShowJoin: Dispatch<SetStateAction<boolean>>;
-}) {
+}>({
+  team: null,
+  setTeam: () => {},
+  showJoin: false,
+  setShowJoin: () => {},
+});
+
+function InitScreen() {
+  const { setShowJoin, setTeam } = useContext(TeamContext);
   const { teamFormationEndDate } = useConfig();
-  const { setFieldValue } = useForm('team');
-  const { user } = useAuth() as AuthenticatedAuthContext;
+  const authCtx = useAuth();
   const { makeRequest: makeTeam, isLoading } = useRequest<TeamServerResponse>(
     '/api/action/createTeam'
   );
@@ -47,6 +59,10 @@ function InitScreen({
     hour12: true,
     timeZone: 'est',
   }).format(teamFormationEndDate);
+
+  if (!authCtx.isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -65,10 +81,9 @@ function InitScreen({
             const res = await makeTeam({ method: 'POST' });
             if (res?.status !== 200) return;
 
-            setFieldValue('team', {
+            setTeam({
+              memberNames: res.message.memberNames,
               code: res.message.code,
-              members: res.message.memberNames,
-              owner: res.message.memberNames[0] === user.fullName,
             });
           }}
           type='button'
@@ -87,21 +102,23 @@ function InitScreen({
   );
 }
 
-function TeamScreen({
-  onNext,
-}: {
-  onNext: MouseEventHandler<HTMLButtonElement>;
-}) {
-  const { values, initialValues, setValues } = useForm('team');
+function TeamScreen({ onNext }: TeamFormationProps) {
+  const { team, setTeam } = useContext(TeamContext);
   const { makeRequest: leaveTeam, isLoading } = useRequest<
     ServerResponse<string>
   >('/api/action/leaveTeam');
+  const authCtx = useAuth();
+
+  if (!authCtx.isAuthenticated) {
+    return null;
+  }
+
+  const isOwner = team?.memberNames[0] === authCtx.user.fullName;
+
   return (
     <>
       <Typography textColor='primary-3' textType='heading2' as='h2'>
-        {values.team.owner
-          ? 'Your team has been created!'
-          : 'You have joined a team!'}
+        {isOwner ? 'Your team has been created!' : 'You have joined a team!'}
       </Typography>
       <Typography
         className={styles.title}
@@ -117,7 +134,7 @@ function TeamScreen({
         textType='heading4'
         as='ul'
       >
-        <li>{values.team.code}</li>
+        <li>{team?.code}</li>
         <li>Teammates can join by entering the Team Code above.</li>
       </Typography>
       <Typography
@@ -134,7 +151,7 @@ function TeamScreen({
         textType='heading4'
         as='ul'
       >
-        {values.team.members.map((member, key) => (
+        {team?.memberNames.map((member, key) => (
           <li key={key}>{member}</li>
         ))}
       </Typography>
@@ -146,36 +163,30 @@ function TeamScreen({
           onClick: async () => {
             const res = await leaveTeam({ method: 'POST' });
             if (res?.status !== 200) return;
-
-            setValues({
-              ...values,
-              team: {
-                ...initialValues.team,
-              },
-            });
+            setTeam(null);
           },
         }}
         rightAction={{
+          ...onNext,
           children: 'Save & Continue',
           disabled: isLoading,
-          onClick: onNext,
         }}
       />
     </>
   );
 }
 
-function JoinScreen({
-  setShowJoin,
-}: {
-  setShowJoin: Dispatch<SetStateAction<boolean>>;
-}) {
+function JoinScreen() {
+  const { setTeam, setShowJoin } = useContext(TeamContext);
   const [code, setCode] = useState('');
-  const { setFieldValue, defaultInputProps } = useForm('team');
-  const { user } = useAuth() as AuthenticatedAuthContext;
+  const authCtx = useAuth();
   const { makeRequest: joinTeam, isLoading } = useRequest<TeamServerResponse>(
     '/api/action/joinTeam'
   );
+
+  if (!authCtx.isAuthenticated) {
+    return null;
+  }
 
   return (
     <>
@@ -187,12 +198,12 @@ function JoinScreen({
       </Typography>
       <div className={styles.join}>
         <Input
-          // Just to get the styling related stuff
-          {...defaultInputProps('code')}
           onChange={(e) => setCode(e.currentTarget.value)}
           placeholder='Enter team code'
+          outlineColor='primary-3'
           label='Team Code'
           value={code}
+          name='code'
         />
         <Button
           onClick={async () => {
@@ -204,11 +215,9 @@ function JoinScreen({
             });
 
             if (res?.status !== 200) return;
-
-            setFieldValue('team', {
+            setTeam({
+              memberNames: res.message.memberNames,
               code: res.message.code,
-              members: res.message.memberNames,
-              owner: res.message.memberNames[0] === user.fullName,
             });
 
             setShowJoin(false);
@@ -233,31 +242,34 @@ function JoinScreen({
   );
 }
 
-function TeamFormation({
-  onNext,
-  onBack,
-  ...props
-}: ApplicationFormSectionProps) {
+function TeamFormation({ onNext }: TeamFormationProps) {
+  const [team, setTeam] = useState<Team | null>(null);
   const [showJoin, setShowJoin] = useState(false);
-  const { setFieldValue, values } = useForm('team');
-  const { user } = useAuth() as AuthenticatedAuthContext;
+  const authCtx = useAuth();
   const { makeRequest: getTeam, isLoading } = useRequest<TeamServerResponse>(
     '/api/action/getTeam'
   );
 
   useEffect(() => {
+    if (!authCtx.isAuthenticated) return;
     getTeam().then((res) => {
       if (!res || res.status === 403) return;
-      setFieldValue('team', {
+      setTeam({
+        memberNames: res.message.memberNames,
         code: res.message.code,
-        members: res.message.memberNames,
-        owner: res.message.memberNames[0] === user?.fullName,
       });
     });
-  }, [getTeam, setFieldValue, user?.fullName]);
+  }, [getTeam, authCtx]);
 
   return (
-    <ApplicationFormSection {...props} name='Join Team'>
+    <TeamContext.Provider
+      value={{
+        setShowJoin,
+        showJoin,
+        setTeam,
+        team,
+      }}
+    >
       {isLoading ? null : (
         <div
           className={cx(
@@ -266,21 +278,17 @@ function TeamFormation({
             styles.root
           )}
         >
-          {values.team.code ? (
+          {team?.code ? (
             <TeamScreen onNext={onNext} />
           ) : showJoin ? (
-            <JoinScreen setShowJoin={setShowJoin} />
+            <JoinScreen />
           ) : (
-            <InitScreen setShowJoin={setShowJoin} />
+            <InitScreen />
           )}
         </div>
       )}
-    </ApplicationFormSection>
+    </TeamContext.Provider>
   );
 }
-
-TeamFormation.validate = (values: FormValuesType) => {
-  return {};
-};
 
 export default TeamFormation;

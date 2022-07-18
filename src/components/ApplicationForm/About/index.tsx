@@ -1,99 +1,177 @@
 import { Checkbox, Dropdown, Input, Typography } from '@ht6/react-ui';
-import cx from 'classnames';
 import * as yup from 'yup';
-import { omit } from 'lodash';
-import { ApplicationFormSection } from '..';
-import ApplicationFooter from '../../ApplicationFooter';
-import { useForm, FormValuesType, useApplicationData } from '../context';
-import { ApplicationFormSectionProps } from '../types';
+import ApplicationFormSection from '../../ApplicationFormSection';
+import { SectionProps, useFormikHelpers } from '../helpers';
+import { useApplicationData } from '..';
 import sharedStyles from '../ApplicationForm.module.scss';
 
-function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
+export const initialValues = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  canEmail: false,
+  gender: '',
+  ethnicity: '',
+  timezone: '',
+  size: '',
+  shippingInfo: {
+    isCanadian: false,
+    line1: '',
+    line2: '',
+    city: '',
+    province: '',
+    postalCode: '',
+    country: 'Canada',
+  },
+};
+
+export const validate = yup.object({
+  firstName: yup.string().required("First Name can't be blank"),
+  lastName: yup.string().required("Last Name can't be blank"),
+  email: yup
+    .string()
+    .email('Please provide a valid email.')
+    .required("Email can't be blank"),
+  canEmail: yup.boolean(),
+  gender: yup.string().required("Gender can't be blank"),
+  ethnicity: yup.string().required("Ethnicity can't be blank"),
+  timezone: yup.string().required("Timezone can't be blank"),
+  size: yup
+    .string()
+    .oneOf(['XS', 'S', 'M', 'L', 'XL'])
+    .required("Size can't be blank"),
+  shippingInfo: yup.lazy((value: typeof initialValues.shippingInfo) =>
+    yup.object(
+      value.isCanadian
+        ? {
+            line1: yup.string().required("Address Line 1 can't be blank"),
+            line2: yup.string().required("Address Line 2 can't be blank"),
+            city: yup.string().required("City can't be blank"),
+            province: yup.string().required("Province can't be blank"),
+            postalCode: yup
+              .string()
+              .matches(
+                /^[A-Z]\d[A-Z]\d[A-Z]\d$/,
+                'Please provide a valid Postal Code (All caps)'
+              )
+              .required("Postal Code can't be blank"),
+          }
+        : undefined
+    )
+  ),
+});
+
+function About(props: SectionProps<typeof initialValues>) {
+  const { applyFieldProps } = useFormikHelpers<typeof initialValues>(props);
   const { enums } = useApplicationData();
-  const { defaultInputProps: shippingInfoInputProps } = useForm('shippingInfo');
-  const { defaultInputProps: aboutInputProps, values } = useForm(
-    'about',
-    props.disabled
-  );
+
   return (
-    <ApplicationFormSection {...props} name='About You'>
+    <ApplicationFormSection>
       <Input
-        {...aboutInputProps('firstName')}
+        {...applyFieldProps({
+          name: 'firstName',
+          label: 'First Name',
+          required: true,
+        })}
         placeholder='Enter first name'
-        label='First Name'
-        required
+        disabled
       />
       <Input
-        {...aboutInputProps('lastName')}
+        {...applyFieldProps({
+          name: 'lastName',
+          label: 'Last Name',
+          required: true,
+        })}
         placeholder='Enter last name'
-        label='Last Name'
-        required
+        disabled
       />
       <Input
-        {...aboutInputProps('email')}
+        {...applyFieldProps({
+          name: 'email',
+          label: 'Email',
+          required: true,
+        })}
         placeholder='name@gmail.com'
-        label='Email'
         type='email'
-        required
+        disabled
       />
       <Checkbox
-        {...omit(aboutInputProps('canEmail'), ['outlineColor'])}
-        label='I give permission to Hack the 6ix for sending me emails containing information from the event sponsors.'
+        {...applyFieldProps({
+          name: 'canEmail',
+          label:
+            'I give permission to Hack the 6ix for sending me emails containing information from the event sponsors.',
+          omitOutline: true,
+          isFullWidth: true,
+          isCheckbox: true,
+        })}
         color='primary-3'
-        className={cx(sharedStyles['field--full-width'])}
       />
       <Dropdown
-        {...omit(aboutInputProps('gender'), ['outlineColor'])}
-        label='Gender'
+        {...applyFieldProps({
+          name: 'gender',
+          label: 'Gender',
+          omitOutline: true,
+          required: true,
+        })}
         options={enums.gender.map((label) => ({
           value: label,
           label,
         }))}
-        required
       />
       <Dropdown
-        {...omit(aboutInputProps('ethnicity'), ['outlineColor'])}
-        className={sharedStyles['field--break']}
-        label='Ethinicity'
+        {...applyFieldProps({
+          name: 'ethnicity',
+          label: 'Ethnicity',
+          omitOutline: true,
+          required: true,
+          isNextRow: true,
+        })}
         options={enums.ethnicity.map((label) => ({
           value: label,
           label,
         }))}
-        required
       />
       <Dropdown
-        {...omit(aboutInputProps('timezone'), ['outlineColor'])}
-        label='Your Timezone'
+        {...applyFieldProps({
+          name: 'timezone',
+          label: 'Your Timezone',
+          omitOutline: true,
+          required: true,
+        })}
         options={enums.timezone.map((label) => ({
           value: label,
           label,
         }))}
-        required
       />
       <Dropdown
-        {...omit(aboutInputProps('size'), ['outlineColor'])}
-        label='Shirt Size'
+        {...applyFieldProps({
+          name: 'size',
+          label: 'Shirt Size',
+          omitOutline: true,
+          required: true,
+        })}
         options={enums.shirt.map((label) => ({
           value: label,
           label,
         }))}
-        required
       />
       <Checkbox
-        {...omit(shippingInfoInputProps('isCanadian'), ['outlineColor'])}
-        label={
-          <span>
-            I live in Canada <strong>and</strong> I want to receive Hack the 6ix
-            swag.
-          </span>
-        }
+        {...applyFieldProps({
+          label: (
+            <span>
+              I live in Canada <strong>and</strong> I want to receive Hack the
+              6ix swag.
+            </span>
+          ),
+          name: 'shippingInfo.isCanadian',
+          omitOutline: true,
+          isFullWidth: true,
+          isCheckbox: true,
+          isNextRow: true,
+        })}
         color='primary-3'
-        className={cx(
-          sharedStyles['field--full-width'],
-          sharedStyles['field--break']
-        )}
       />
-      {values.shippingInfo.isCanadian && (
+      {props.values.shippingInfo.isCanadian && (
         <>
           <div className={sharedStyles['field--full-width']}>
             <Typography textColor='primary-3' textType='heading3' as='h2'>
@@ -105,94 +183,68 @@ function About({ onNext, onBack, ...props }: ApplicationFormSectionProps) {
             </Typography>
           </div>
           <Input
-            {...shippingInfoInputProps('line1')}
+            {...applyFieldProps({
+              name: 'shippingInfo.line1',
+              label: 'Address Line 1',
+              required: true,
+            })}
             placeholder='Enter street number and street name'
-            label='Address Line 1'
-            required
           />
           <Input
-            {...shippingInfoInputProps('line2')}
-            className={sharedStyles['field--break']}
+            {...applyFieldProps({
+              name: 'shippingInfo.line2',
+              label: 'Address Line 2',
+              isNextRow: true,
+              required: true,
+            })}
             placeholder='Apartment, suite number, etc.'
-            label='Address Line 2'
-            required
           />
           <Input
-            {...shippingInfoInputProps('city')}
-            className={sharedStyles['field--break']}
+            {...applyFieldProps({
+              name: 'shippingInfo.city',
+              label: 'City',
+              isNextRow: true,
+              required: true,
+            })}
             placeholder='Enter city name'
-            label='City'
-            required
           />
           <Dropdown
-            {...omit(shippingInfoInputProps('province'), ['outlineColor'])}
-            label='Province'
+            {...applyFieldProps({
+              name: 'shippingInfo.province',
+              label: 'Province',
+              required: true,
+              omitOutline: true,
+            })}
             options={enums.province.map((label) => ({
               value: label,
               label,
             }))}
-            required
           />
           <Input
-            {...shippingInfoInputProps('postalCode')}
+            {...applyFieldProps({
+              name: 'shippingInfo.postalCode',
+              label: 'Postal Code',
+              required: true,
+            })}
             placeholder='Ex. V4Q3H9'
-            label='Postal Code'
-            required
+          />
+          <Dropdown
+            {...applyFieldProps({
+              name: 'shippingInfo.country',
+              label: 'Country',
+              required: true,
+              omitOutline: true,
+            })}
+            options={enums.countries.map((label) => ({
+              value: label,
+              label,
+            }))}
+            disabled
           />
         </>
       )}
-      <ApplicationFooter
-        className={sharedStyles.footer}
-        rightAction={{
-          children: 'Save & Continue',
-          onClick: onNext,
-          type: 'submit',
-        }}
-      />
     </ApplicationFormSection>
   );
 }
-
-About.validate = (values: FormValuesType) => {
-  const validationSchema: {
-    about: yup.AnySchema;
-    shippingInfo?: yup.AnySchema;
-  } = {
-    about: yup.object().shape({
-      firstName: yup.string().required("First Name can't be blank"),
-      lastName: yup.string().required("Last Name can't be blank"),
-      email: yup
-        .string()
-        .email('Please provide a valid email.')
-        .required("Email can't be blank"),
-      canEmail: yup.boolean(),
-      gender: yup.string().required("Gender can't be blank"),
-      ethnicity: yup.string().required("Ethnicity can't be blank"),
-      timezone: yup.string().required("Timezone can't be blank"),
-      size: yup
-        .string()
-        .oneOf(['XS', 'S', 'M', 'L', 'XL'])
-        .required("Size can't be blank"),
-    }),
-  };
-
-  if (values.shippingInfo.isCanadian) {
-    validationSchema.shippingInfo = yup.object().shape({
-      line1: yup.string().required("Address Line 1 can't be blank"),
-      line2: yup.string().required("Address Line 2 can't be blank"),
-      city: yup.string().required("City can't be blank"),
-      province: yup.string().required("Province can't be blank"),
-      postalCode: yup
-        .string()
-        .matches(
-          /^[A-Z]\d[A-Z]\d[A-Z]\d$/,
-          'Please provide a valid Postal Code (All caps)'
-        )
-        .required("Postal Code can't be blank"),
-    });
-  }
-
-  return validationSchema;
-};
 
 export default About;

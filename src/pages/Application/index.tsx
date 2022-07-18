@@ -1,29 +1,62 @@
-import { FC, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import { fill, forEach } from 'lodash';
 import {
-  ApplicationFormMessage,
-  ApplicationFormProvider,
-} from '../../components/ApplicationForm';
-import About from '../../components/ApplicationForm/About';
-import AtHt6 from '../../components/ApplicationForm/AtHt6';
-import Experience from '../../components/ApplicationForm/Experience';
-import TeamFormation from '../../components/ApplicationForm/TeamFormation';
+  cloneElement,
+  FC,
+  ReactElement,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import * as yup from 'yup';
 import { useConfig } from '../../components/Configuration/context';
 import HeadingSection from '../../components/HeadingSection';
 import TabSection, { Tab } from '../../components/TabSection';
-import { ApplicationFormSectionProps } from '../../components/ApplicationForm/types';
 import Protected from '../../components/Authentication/Protected';
 import useAuth from '../../components/Authentication/context';
-import {
-  FormValuesType,
-  useForm,
-} from '../../components/ApplicationForm/context';
 import styles from './Application.module.scss';
+import * as About from '../../components/ApplicationForm/About';
+import { FormikProps, useFormik, yupToFormErrors } from 'formik';
+import {
+  ApplicationDataProvider,
+  useApplicationData,
+} from '../../components/ApplicationForm';
+import ApplicationFooter, {
+  ApplicationFooterProps,
+} from '../../components/ApplicationFooter';
+import * as TeamFormation from '../../components/ApplicationForm/TeamFormation';
+import * as Experience from '../../components/ApplicationForm/Experience';
+import * as AtHt6 from '../../components/ApplicationForm/AtHt6';
+import { ApplicationModule } from '../../components/ApplicationForm/helpers';
+import { useRequest } from '../../utils/useRequest';
+import { serializeApplication, deserializeApplication } from './helpers';
+import toast from 'react-hot-toast';
+
+interface TabContentProps<T> {
+  element: FC<any>;
+  formik?: FormikProps<T>;
+  footerProps?: ApplicationFooterProps;
+  readonly?: boolean;
+}
+function TabContent<T>({
+  element: Element,
+  footerProps,
+  formik,
+  readonly,
+}: TabContentProps<T>) {
+  return (
+    <>
+      <Element {...formik} readonly={readonly} />
+      {footerProps && (
+        <ApplicationFooter className={styles.footer} {...footerProps} />
+      )}
+    </>
+  );
+}
 
 const tabs: (Omit<Tab, 'element'> & {
-  element: FC<ApplicationFormSectionProps>;
-  ref: keyof FormValuesType;
+  element: ReactElement;
+  module?: ApplicationModule;
+  ref: string;
   id: string;
 })[] = [
   {
@@ -32,7 +65,7 @@ const tabs: (Omit<Tab, 'element'> & {
         1<span className={styles.label}>. Team Formation</span>
       </span>
     ),
-    element: TeamFormation,
+    element: <TabContent element={TeamFormation.default} />,
     id: 'team-formation',
     ref: 'team',
   },
@@ -42,7 +75,8 @@ const tabs: (Omit<Tab, 'element'> & {
         2<span className={styles.label}>. About You</span>
       </span>
     ),
-    element: About,
+    module: About,
+    element: <TabContent element={About.default} />,
     id: 'about-you',
     ref: 'about',
   },
@@ -52,7 +86,8 @@ const tabs: (Omit<Tab, 'element'> & {
         3<span className={styles.label}>. Your Experience</span>
       </span>
     ),
-    element: Experience,
+    module: Experience,
+    element: <TabContent element={Experience.default} />,
     id: 'your-experience',
     ref: 'experience',
   },
@@ -62,35 +97,79 @@ const tabs: (Omit<Tab, 'element'> & {
         4<span className={styles.label}>. At HT6</span>
       </span>
     ),
-    element: AtHt6,
+    module: AtHt6,
+    element: <TabContent element={AtHt6.default} />,
     id: 'at-ht6',
     ref: 'at',
   },
 ];
 
 function ApplicationContent() {
-  const [messages, setMessages] = useState<ApplicationFormMessage[][]>(
-    fill(Array(tabs.length), [])
-  );
+  const { makeRequest } = useRequest('/api/action/updateapp');
+  const { enums } = useApplicationData();
+  const authCtx = useAuth();
+  const toastRef = useRef({ toastId: 'application', count: 0 });
+  const { endDate } = useConfig();
+  const navigate = useNavigate();
   const location = useLocation();
+
   const [selected, setSelected] = useState(() => {
     const { hash } = location;
     const idx = tabs.findIndex((tab) => hash === `#${tab.id}`);
     return idx < 0 ? 0 : idx;
   });
-  const navigate = useNavigate();
-  const { touched, setTouched, errors, values, initialValues } = useForm();
 
-  const touch = (idx: number) => {
-    const section = Object.keys(initialValues)[idx] as keyof FormValuesType;
-    // Update all fields in section to be touched for errors to show
-    const updatedTouched: { [field: string]: true } = {};
-    forEach(initialValues[section], (_, key) => (updatedTouched[key] = true));
-    setTouched({
-      ...touched,
-      [section]: updatedTouched,
-    });
-  };
+  const formik = useFormik({
+    initialValues: {
+      ...About.initialValues,
+      ...Experience.initialValues,
+      ...AtHt6.initialValues,
+    },
+    validateOnChange: false,
+    validateOnBlur: false,
+    async validate(values) {
+      try {
+        await tabs[selected].module?.validate.validate(values, {
+          abortEarly: false,
+        });
+      } catch (err) {
+        return yupToFormErrors(err);
+      }
+    },
+    async onSubmit(values, { setErrors }) {
+      try {
+        const application = await yup
+          .object()
+          .concat(About.validate)
+          .concat(Experience.validate)
+          .concat(AtHt6.validate)
+          .validate(values, { abortEarly: false });
+        await makeRequest({
+          method: 'POST',
+          body: JSON.stringify({
+            submit: false,
+            application,
+          }),
+        });
+      } catch (err) {
+        setErrors(yupToFormErrors(err));
+      }
+    },
+  });
+
+  useEffect(() => {
+    if (!authCtx.isAuthenticated) return;
+    const payload = {
+      ...deserializeApplication(authCtx.user.hackerApplication, enums),
+      firstName: authCtx.user.firstName,
+      lastName: authCtx.user.lastName,
+      email: authCtx.user.email,
+    };
+    formik.initialValues = payload;
+    formik.setValues(payload, false);
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authCtx, formik.setValues]);
 
   const updateUrl = (idx: number) => {
     const tab = tabs[idx];
@@ -100,56 +179,9 @@ function ApplicationContent() {
     setSelected(idx);
   };
 
-  const generateMessages = (idx: number) => {
-    const tabHasError = tabs.map((tab) =>
-      Object.values(errors[tab.ref] ?? {}).some(Boolean)
-    );
-    if (values.shippingInfo.isCanadian) {
-      tabHasError[0] ||= Object.values(errors.shippingInfo ?? {}).some(Boolean);
-    }
-  };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => formik.setErrors({}), [selected, formik.setErrors]);
 
-  console.log(values, generateMessages(0));
-
-  return (
-    <TabSection
-      onChange={(_, idx) => {
-        touch(selected);
-        updateUrl(idx);
-      }}
-      value={selected}
-      tabs={tabs.map((tab, key) => {
-        return {
-          ...tab,
-          element: (
-            <tab.element
-              messages={messages[key]}
-              onClose={(_, idx) => {
-                const _messages = [...messages];
-                _messages[key] = [..._messages[key]];
-                _messages[key].splice(idx, 1);
-                setMessages(_messages);
-              }}
-              onNext={() => {
-                touch(selected);
-                updateUrl(key + 1);
-              }}
-              onBack={() => {
-                updateUrl(key - 1);
-              }}
-              key={key}
-            />
-          ),
-        };
-      })}
-    />
-  );
-}
-
-function Application() {
-  const { revokeAuth } = useAuth();
-  const { endDate } = useConfig();
-  const navigate = useNavigate();
   const formattedDate = new Intl.DateTimeFormat('en', {
     month: 'short',
     day: 'numeric',
@@ -163,8 +195,8 @@ function Application() {
   }).format(endDate);
 
   return (
-    <Protected>
-      <main className={styles.root}>
+    <main>
+      <form onSubmit={formik?.handleSubmit} className={styles.root} noValidate>
         <HeadingSection
           title='Hacker Application'
           description={`Applications close on ${formattedDate} at ${formattedTime}.
@@ -172,16 +204,92 @@ function Application() {
             your application, keep an eye on your inbox for your application results!`}
           action={{
             onClick: async () => {
-              await revokeAuth();
+              await authCtx.revokeAuth();
               navigate('/');
             },
             children: 'Sign Out',
           }}
         />
-        <ApplicationFormProvider onSubmit={() => console.log('owo')}>
-          <ApplicationContent />
-        </ApplicationFormProvider>
-      </main>
+        <TabSection
+          onChange={(_, idx) => {
+            updateUrl(idx);
+          }}
+          value={selected}
+          tabs={tabs.map((tab, key) => {
+            const isFirst = key === 1;
+            const isLast = key + 1 === tabs.length;
+            let tabProps;
+
+            switch (tab.ref) {
+              case 'team':
+                tabProps = {
+                  formik: {
+                    ...formik,
+                    onNext: {
+                      onClick: () => updateUrl(key + 1),
+                    },
+                  } as any,
+                };
+                break;
+              default:
+                tabProps = {
+                  formik,
+                  footerProps: {
+                    leftAction: isFirst
+                      ? undefined
+                      : {
+                          onClick() {
+                            updateUrl(key - 1);
+                          },
+                          children: 'Back',
+                        },
+                    rightAction: {
+                      children: isLast ? 'Submit' : 'Save & Continue',
+                      async onClick() {
+                        if (isLast) return;
+                        toastRef.current.count++;
+                        toast.loading('Saving application...', {
+                          id: toastRef.current.toastId,
+                        });
+
+                        await makeRequest({
+                          method: 'POST',
+                          body: JSON.stringify({
+                            application: serializeApplication(formik.values),
+                            submit: false,
+                          }),
+                        });
+
+                        toastRef.current.count--;
+                        window.setTimeout(() => {
+                          if (toastRef.current.count === 0) {
+                            toast.success('Application saved!', {
+                              id: toastRef.current.toastId,
+                            });
+                          }
+                        }, 500);
+                      },
+                      type: 'submit',
+                    },
+                  },
+                };
+                break;
+            }
+
+            return { ...tab, element: cloneElement(tab.element, tabProps) };
+          })}
+        />
+      </form>
+    </main>
+  );
+}
+
+function Application() {
+  return (
+    <Protected>
+      <ApplicationDataProvider>
+        <ApplicationContent />
+      </ApplicationDataProvider>
     </Protected>
   );
 }

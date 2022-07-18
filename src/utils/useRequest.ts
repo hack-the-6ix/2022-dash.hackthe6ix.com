@@ -1,4 +1,5 @@
 import { useCallback, useRef, useState } from 'react';
+import { omitBy, isNil } from 'lodash';
 import { useAuth } from '../components/Authentication/context';
 
 type TokenState = {
@@ -42,10 +43,13 @@ export function request(path: string, payload?: RequestInit, ref?: string) {
 
   return fetch(`${process.env.REACT_APP_API_URL}${path ?? ''}`, {
     ...payload,
-    headers: {
-      ...payload?.headers,
-      'content-type': 'application/json',
-    },
+    headers: omitBy(
+      {
+        'content-type': 'application/json',
+        ...payload?.headers,
+      },
+      isNil
+    ) as any,
     signal: ref ? controllers[ref]?.signal : null,
   });
 }
