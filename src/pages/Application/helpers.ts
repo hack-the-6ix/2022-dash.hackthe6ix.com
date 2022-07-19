@@ -66,6 +66,7 @@ export function serializeApplication(
       ['gender', 'gender'],
       ['ethnicity', 'ethnicity'],
       ['timezone', 'timezone'],
+      ['size', 'shirtSize'],
       ['shippingInfo.isCanadian', 'wantSwag'],
       ['shippingInfo.line1', 'addressLine1'],
       ['shippingInfo.line2', 'addressLine2'],
@@ -115,7 +116,7 @@ export function serializeApplication(
   }
 
   // ! Missing following fields for this year
-  // phoneNumber, pronouns, shirtSize
+  // phoneNumber, pronouns
   return {
     ...serializedData,
     phoneNumber: '',
@@ -194,6 +195,5 @@ export function deserializeApplication(
     deserializedData.resume = values.resumeFileName as any;
   }
 
-  deserializedData = setIn(deserializedData, 'shippingInfo.country', 'Canada');
   return deserializedData;
 }

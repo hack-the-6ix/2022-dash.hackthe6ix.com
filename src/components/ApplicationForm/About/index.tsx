@@ -4,13 +4,16 @@ import ApplicationFormSection from '../../ApplicationFormSection';
 import { SectionProps, useFormikHelpers } from '../helpers';
 import { useApplicationData } from '..';
 import sharedStyles from '../ApplicationForm.module.scss';
+import { useEffect } from 'react';
 
 export const initialValues = {
   firstName: '',
   lastName: '',
   email: '',
+  phone: '',
   canEmail: false,
   gender: '',
+  pronouns: '',
   ethnicity: '',
   timezone: '',
   size: '',
@@ -32,6 +35,7 @@ export const validate = yup.object({
     .string()
     .email('Please provide a valid email.')
     .required("Email can't be blank"),
+  phone: yup.string().required("Phone Number can't be blank"),
   canEmail: yup.boolean(),
   gender: yup.string().required("Gender can't be blank"),
   ethnicity: yup.string().required("Ethnicity can't be blank"),
@@ -64,6 +68,17 @@ export const validate = yup.object({
 function About(props: SectionProps<typeof initialValues>) {
   const { applyFieldProps } = useFormikHelpers<typeof initialValues>(props);
   const { enums } = useApplicationData();
+  const { isCanadian, country } = props.values.shippingInfo;
+  const { setFieldValue } = props;
+
+  useEffect(() => {
+    if (!isCanadian) {
+      setFieldValue('shippingInfo', {
+        isCanadian,
+        country,
+      });
+    }
+  }, [setFieldValue, isCanadian, country]);
 
   return (
     <ApplicationFormSection>
@@ -95,6 +110,15 @@ function About(props: SectionProps<typeof initialValues>) {
         type='email'
         disabled
       />
+      <Input
+        {...applyFieldProps({
+          name: 'phone',
+          label: 'Phone Number',
+          required: true,
+        })}
+        placeholder='1234567890'
+        type='phone'
+      />
       <Checkbox
         {...applyFieldProps({
           name: 'canEmail',
@@ -120,11 +144,22 @@ function About(props: SectionProps<typeof initialValues>) {
       />
       <Dropdown
         {...applyFieldProps({
+          name: 'pronouns',
+          label: 'Pronouns',
+          omitOutline: true,
+          required: true,
+        })}
+        options={enums.pronouns.map((label) => ({
+          value: label,
+          label,
+        }))}
+      />
+      <Dropdown
+        {...applyFieldProps({
           name: 'ethnicity',
           label: 'Ethnicity',
           omitOutline: true,
           required: true,
-          isNextRow: true,
         })}
         options={enums.ethnicity.map((label) => ({
           value: label,
@@ -155,6 +190,19 @@ function About(props: SectionProps<typeof initialValues>) {
           label,
         }))}
       />
+      <Dropdown
+        {...applyFieldProps({
+          name: 'shippingInfo.country',
+          label: 'Country',
+          required: true,
+          omitOutline: true,
+        })}
+        disabled={props.readonly || isCanadian}
+        options={enums.countries.map((label) => ({
+          value: label,
+          label,
+        }))}
+      />
       <Checkbox
         {...applyFieldProps({
           label: (
@@ -169,9 +217,10 @@ function About(props: SectionProps<typeof initialValues>) {
           isCheckbox: true,
           isNextRow: true,
         })}
+        disabled={props.readonly || country !== 'Canada'}
         color='primary-3'
       />
-      {props.values.shippingInfo.isCanadian && (
+      {isCanadian && (
         <>
           <div className={sharedStyles['field--full-width']}>
             <Typography textColor='primary-3' textType='heading3' as='h2'>
@@ -194,7 +243,6 @@ function About(props: SectionProps<typeof initialValues>) {
             {...applyFieldProps({
               name: 'shippingInfo.line2',
               label: 'Address Line 2',
-              isNextRow: true,
               required: true,
             })}
             placeholder='Apartment, suite number, etc.'
@@ -203,7 +251,6 @@ function About(props: SectionProps<typeof initialValues>) {
             {...applyFieldProps({
               name: 'shippingInfo.city',
               label: 'City',
-              isNextRow: true,
               required: true,
             })}
             placeholder='Enter city name'
@@ -227,19 +274,6 @@ function About(props: SectionProps<typeof initialValues>) {
               required: true,
             })}
             placeholder='Ex. V4Q3H9'
-          />
-          <Dropdown
-            {...applyFieldProps({
-              name: 'shippingInfo.country',
-              label: 'Country',
-              required: true,
-              omitOutline: true,
-            })}
-            options={enums.countries.map((label) => ({
-              value: label,
-              label,
-            }))}
-            disabled
           />
         </>
       )}
