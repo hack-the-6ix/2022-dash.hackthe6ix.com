@@ -1,50 +1,60 @@
+import { Typography } from '@ht6/react-ui';
+import { FormikProps, useFormik, yupToFormErrors } from 'formik';
 import {
-  cloneElement,
   FC,
   ReactElement,
+  ReactNode,
+  cloneElement,
   useEffect,
   useRef,
   useState,
 } from 'react';
+import toast from 'react-hot-toast';
 import { useLocation, useNavigate } from 'react-router-dom';
 import * as yup from 'yup';
-import { useConfig } from '../../components/Configuration/context';
-import HeadingSection from '../../components/HeadingSection';
-import TabSection, { Tab } from '../../components/TabSection';
-import Protected from '../../components/Authentication/Protected';
-import useAuth from '../../components/Authentication/context';
-import styles from './Application.module.scss';
-import * as About from '../../components/ApplicationForm/About';
-import { FormikProps, useFormik, yupToFormErrors } from 'formik';
+
+import ApplicationFooter, {
+  ApplicationFooterProps,
+} from '../../components/ApplicationFooter';
 import {
   ApplicationDataProvider,
   useApplicationData,
 } from '../../components/ApplicationForm';
-import ApplicationFooter, {
-  ApplicationFooterProps,
-} from '../../components/ApplicationFooter';
-import * as TeamFormation from '../../components/ApplicationForm/TeamFormation';
-import * as Experience from '../../components/ApplicationForm/Experience';
+import * as About from '../../components/ApplicationForm/About';
 import * as AtHt6 from '../../components/ApplicationForm/AtHt6';
+import * as Experience from '../../components/ApplicationForm/Experience';
+import * as TeamFormation from '../../components/ApplicationForm/TeamFormation';
 import { ApplicationModule } from '../../components/ApplicationForm/helpers';
+import Protected from '../../components/Authentication/Protected';
+import useAuth from '../../components/Authentication/context';
+import { useConfig } from '../../components/Configuration/context';
+import HeadingSection from '../../components/HeadingSection';
+import InfoBanner from '../../components/InfoBanner';
+import TabSection, { Tab } from '../../components/TabSection';
 import { useRequest } from '../../utils/useRequest';
-import { serializeApplication, deserializeApplication } from './helpers';
-import toast from 'react-hot-toast';
+import { deserializeApplication, serializeApplication } from './helpers';
+
+import styles from './Application.module.scss';
 
 interface TabContentProps<T> {
   element: FC<any>;
   formik?: FormikProps<T>;
   footerProps?: ApplicationFooterProps;
+  message?: ReactNode;
   readonly?: boolean;
 }
 function TabContent<T>({
   element: Element,
   footerProps,
+  message,
   formik,
   readonly,
 }: TabContentProps<T>) {
   return (
     <>
+      {message && (
+        <InfoBanner className={styles.banner} children={message} type='error' />
+      )}
       <Element {...formik} readonly={readonly} />
       {footerProps && (
         <ApplicationFooter className={styles.footer} {...footerProps} />
@@ -104,6 +114,11 @@ const tabs: (Omit<Tab, 'element'> & {
   },
 ];
 
+type PageState = {
+  message?: ReactNode;
+  readonly: boolean;
+};
+
 function ApplicationContent() {
   const { makeRequest } = useRequest('/api/action/updateapp');
   const { enums } = useApplicationData();
@@ -157,6 +172,47 @@ function ApplicationContent() {
     },
   });
 
+  const generatePageStates = (values = formik.values) => {
+    const pagesIsValid = tabs.map(
+      (tab) => tab.module?.validate.isValidSync(values) ?? true
+    );
+    return pagesIsValid.map((_, i) => {
+      const hasPageErrors = !pagesIsValid.slice(0, i).every(Boolean);
+      return {
+        readonly: hasPageErrors,
+        message: hasPageErrors ? (
+          <>
+            <Typography textType='heading4' textColor='copy-dark' as='h3'>
+              Please resolve the following pages before you submit.
+            </Typography>
+            <Typography className={styles.list} textType='heading4' as='ul'>
+              {pagesIsValid.map((isValid, idx) =>
+                !isValid && idx < i ? (
+                  <li onClick={() => updateUrl(idx)} key={idx}>
+                    {tabs[idx].label}
+                  </li>
+                ) : null
+              )}
+            </Typography>
+          </>
+        ) : null,
+      };
+    });
+  };
+
+  const [pageStates, setPageStates] = useState<PageState[]>(generatePageStates);
+
+  const updateUrl = (idx: number) => {
+    const tab = tabs[idx];
+    if (!tab) return;
+
+    setPageStates(generatePageStates());
+
+    navigate(`${location.pathname}#${tab.id}`, { replace: true });
+    setSelected(idx);
+  };
+
+  // Fetching application from user
   useEffect(() => {
     if (!authCtx.isAuthenticated) return;
     const payload = {
@@ -167,20 +223,16 @@ function ApplicationContent() {
     };
     formik.initialValues = payload;
     formik.setValues(payload, false);
+    setPageStates(generatePageStates(payload));
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authCtx, formik.setValues]);
 
-  const updateUrl = (idx: number) => {
-    const tab = tabs[idx];
-    if (!tab) return;
-
-    navigate(`${location.pathname}#${tab.id}`, { replace: true });
-    setSelected(idx);
-  };
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => formik.setErrors({}), [selected, formik.setErrors]);
+  // Handling error stuff
+  useEffect(() => {
+    formik.setErrors({});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected, formik.setErrors]);
 
   const formattedDate = new Intl.DateTimeFormat('en', {
     month: 'short',
@@ -220,9 +272,15 @@ function ApplicationContent() {
             const isLast = key + 1 === tabs.length;
             let tabProps;
 
+            const sharedProps = {
+              ...pageStates?.[key],
+              formik,
+            };
+
             switch (tab.ref) {
               case 'team':
                 tabProps = {
+                  ...sharedProps,
                   formik: {
                     ...formik,
                     onNext: {
@@ -233,7 +291,7 @@ function ApplicationContent() {
                 break;
               default:
                 tabProps = {
-                  formik,
+                  ...sharedProps,
                   footerProps: {
                     leftAction: isFirst
                       ? undefined
@@ -259,6 +317,14 @@ function ApplicationContent() {
                             submit: false,
                           }),
                         });
+
+                        if (
+                          await tabs[selected].module?.validate.isValid(
+                            formik.values
+                          )
+                        ) {
+                          updateUrl(key + 1);
+                        }
 
                         toastRef.current.count--;
                         window.setTimeout(() => {

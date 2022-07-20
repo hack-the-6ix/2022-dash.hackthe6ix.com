@@ -1,6 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useRequest, ServerResponse } from '../../utils/useRequest';
+
+import { ServerResponse, useRequest } from '../../utils/useRequest';
 import useAuth from './context';
 
 export interface ProtectedProps {

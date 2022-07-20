@@ -1,11 +1,13 @@
+import { Typography } from '@ht6/react-ui';
+import '@ht6/react-ui/dist/styles/index.css';
 import { ToastBar, Toaster } from 'react-hot-toast';
 import { Route, Routes } from 'react-router-dom';
-import { Typography } from '@ht6/react-ui';
+
 import Application from '../../pages/Application';
-import Dashboard from '../../pages/Dashboard';
 import Callback from '../../pages/Callback';
+import Dashboard from '../../pages/Dashboard';
 import Layout from '../Layout';
-import '@ht6/react-ui/dist/styles/index.css';
+
 import styles from './App.module.scss';
 
 function App() {

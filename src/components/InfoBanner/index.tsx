@@ -1,8 +1,9 @@
-import { FaTimes, FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import { Colors } from '@ht6/react-ui/dist/styles';
-import { IconType } from 'react-icons';
-import { MouseEventHandler, ReactNode } from 'react';
 import cx from 'classnames';
+import { MouseEventHandler, ReactNode } from 'react';
+import { IconType } from 'react-icons';
+import { FaCheckCircle, FaExclamationCircle, FaTimes } from 'react-icons/fa';
+
 import styles from './InfoBanner.module.scss';
 
 export interface InfoBannerProps {

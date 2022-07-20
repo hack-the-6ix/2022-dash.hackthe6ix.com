@@ -1,9 +1,11 @@
 import { Checkbox, Input, InputLayout, Textarea } from '@ht6/react-ui';
+import { isNil, omitBy } from 'lodash';
 import * as yup from 'yup';
-import { omitBy, isNil } from 'lodash';
-import { SectionProps, useFormikHelpers } from '../helpers';
+
 import { useApplicationData } from '..';
 import ApplicationFormSection from '../../ApplicationFormSection';
+import { SectionProps, useFormikHelpers } from '../helpers';
+
 import sharedStyles from '../ApplicationForm.module.scss';
 import styles from './AtHt6.module.scss';
 

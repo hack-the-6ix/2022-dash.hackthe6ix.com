@@ -1,19 +1,20 @@
 import {
   Checkbox,
-  Input,
-  Textarea,
-  FileUpload,
   Dropdown,
+  FileUpload,
+  Input,
   SearchDropdown,
+  Textarea,
 } from '@ht6/react-ui';
-import * as yup from 'yup';
-import stringSimilarity from 'string-similarity';
-import { SectionProps, useFormikHelpers } from '../helpers';
-import { useApplicationData } from '..';
-import ApplicationFormSection from '../../ApplicationFormSection';
 import { useEffect } from 'react';
-import { useRequest } from '../../../utils/useRequest';
 import toast from 'react-hot-toast';
+import stringSimilarity from 'string-similarity';
+import * as yup from 'yup';
+
+import { useApplicationData } from '..';
+import { useRequest } from '../../../utils/useRequest';
+import ApplicationFormSection from '../../ApplicationFormSection';
+import { SectionProps, useFormikHelpers } from '../helpers';
 
 export const initialValues = {
   school: '',

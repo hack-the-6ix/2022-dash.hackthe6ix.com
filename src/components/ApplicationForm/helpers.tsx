@@ -1,11 +1,13 @@
 import { Colors } from '@ht6/react-ui/dist/styles';
-import type { AnySchema } from 'yup';
-import { omitBy, isNil } from 'lodash';
-import { FormikProps, getIn } from 'formik';
-import { ReactNode, FC } from 'react';
 import cx from 'classnames';
-import styles from './ApplicationForm.module.scss';
+import { FormikProps, getIn } from 'formik';
+import { isNil, omitBy } from 'lodash';
+import { FC, ReactNode } from 'react';
+import type { AnySchema } from 'yup';
+
 import { NestedKey } from '../../types';
+
+import styles from './ApplicationForm.module.scss';
 
 export interface SectionProps<T> extends FormikProps<T> {
   readonly?: boolean;

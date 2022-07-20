@@ -1,21 +1,23 @@
 import { Button, Input, Typography } from '@ht6/react-ui';
+import cx from 'classnames';
 import {
-  createContext,
   Dispatch,
   SetStateAction,
+  createContext,
   useContext,
   useEffect,
   useState,
 } from 'react';
-import cx from 'classnames';
-import { useConfig } from '../../Configuration/context';
+
+import { ServerResponse, useRequest } from '../../../utils/useRequest';
 import ApplicationFooter, {
   ApplicationFooterProps,
 } from '../../ApplicationFooter';
+import useAuth from '../../Authentication/context';
+import { useConfig } from '../../Configuration/context';
+
 import sharedStyles from '../ApplicationForm.module.scss';
 import styles from './TeamFormation.module.scss';
-import { ServerResponse, useRequest } from '../../../utils/useRequest';
-import useAuth from '../../Authentication/context';
 
 type Team = {
   code: string;

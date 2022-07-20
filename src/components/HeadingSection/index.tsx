@@ -1,7 +1,9 @@
 import { Button, ButtonProps, Typography } from '@ht6/react-ui';
-import { ReactNode } from 'react';
 import cx from 'classnames';
+import { ReactNode } from 'react';
+
 import Section from '../Section';
+
 import styles from './HeadingSection.module.scss';
 
 export type HeadingSectionProps = {

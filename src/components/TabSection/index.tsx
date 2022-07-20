@@ -1,8 +1,10 @@
 import { Typography, useTwoWayState } from '@ht6/react-ui';
-import { ReactNode } from 'react';
 import cx from 'classnames';
+import { ReactNode } from 'react';
+
 import Card from '../Card';
 import Section from '../Section';
+
 import styles from './TabSection.module.scss';
 
 export type Tab = {

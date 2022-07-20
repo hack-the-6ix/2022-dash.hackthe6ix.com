@@ -1,10 +1,11 @@
-import { initialValues as about } from '../../components/ApplicationForm/About';
-import { initialValues as experience } from '../../components/ApplicationForm/Experience';
-import { initialValues as atHt6 } from '../../components/ApplicationForm/AtHt6';
-import { NestedKey } from '../../types';
 import { getIn, setIn } from 'formik';
 import { isEmpty } from 'lodash';
+
 import { ApplicationEnumType } from '../../components/ApplicationForm';
+import { initialValues as about } from '../../components/ApplicationForm/About';
+import { initialValues as atHt6 } from '../../components/ApplicationForm/AtHt6';
+import { initialValues as experience } from '../../components/ApplicationForm/Experience';
+import { NestedKey } from '../../types';
 
 type ClientApplication = typeof about & typeof experience & typeof atHt6;
 
@@ -62,8 +63,10 @@ export function serializeApplication(
   let serializedData = remap(
     [
       // About you
+      ['phone', 'phoneNumber'],
       ['canEmail', 'emailConsent'],
       ['gender', 'gender'],
+      ['pronouns', 'pronouns'],
       ['ethnicity', 'ethnicity'],
       ['timezone', 'timezone'],
       ['size', 'shirtSize'],
@@ -103,25 +106,11 @@ export function serializeApplication(
     workshops.push(values.otherInterest.replace(/ *, */g, ','));
   serializedData.requestedWorkshops = workshops.join(',');
 
-  if (!values.shippingInfo.isCanadian) {
-    serializedData = {
-      ...serializedData,
-      addressLine1: '',
-      addressLine2: '',
-      city: '',
-      province: '',
-      postalCode: '',
-      country: '',
-    };
-  }
-
   // ! Missing following fields for this year
   // phoneNumber, pronouns
   return {
     ...serializedData,
-    phoneNumber: '',
-    pronouns: '',
-    shirtSize: '',
+    phoneNumber: serializedData.phoneNumber,
   };
 }
 
@@ -137,10 +126,13 @@ export function deserializeApplication(
     ...remap(
       [
         // About you
+        ['phoneNumber', 'phone'],
         ['emailConsent', 'canEmail'],
         ['gender', 'gender'],
+        ['pronouns', 'pronouns'],
         ['ethnicity', 'ethnicity'],
         ['timezone', 'timezone'],
+        ['shirtSize', 'size'],
         ['wantSwag', 'shippingInfo.isCanadian'],
         ['addressLine1', 'shippingInfo.line1'],
         ['addressLine2', 'shippingInfo.line2'],
@@ -172,7 +164,7 @@ export function deserializeApplication(
   };
 
   // Apply special rules
-  const rawWorkshops = values.requestedWorkshops
+  const rawWorkshops = (values.requestedWorkshops ?? '')
     .split(',')
     .filter((v) => !isEmpty(v));
   if (rawWorkshops.length) {

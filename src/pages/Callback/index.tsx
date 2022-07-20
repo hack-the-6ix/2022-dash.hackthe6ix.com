@@ -1,13 +1,15 @@
 import { Typography } from '@ht6/react-ui';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { MdError } from 'react-icons/md';
 import { CgSpinner } from 'react-icons/cg';
+import { MdError } from 'react-icons/md';
+import { useNavigate } from 'react-router-dom';
+
 import useAuth from '../../components/Authentication/context';
 import Card from '../../components/Card';
 import Section from '../../components/Section';
 import getQueryParams from '../../utils/getQueryParams';
 import { ServerResponse, useRequest } from '../../utils/useRequest';
+
 import styles from './Callback.module.scss';
 
 type QueryParams = {

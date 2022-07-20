@@ -1,10 +1,12 @@
 import { Checkbox, Dropdown, Input, Typography } from '@ht6/react-ui';
+import { useEffect } from 'react';
 import * as yup from 'yup';
+
+import { useApplicationData } from '..';
 import ApplicationFormSection from '../../ApplicationFormSection';
 import { SectionProps, useFormikHelpers } from '../helpers';
-import { useApplicationData } from '..';
+
 import sharedStyles from '../ApplicationForm.module.scss';
-import { useEffect } from 'react';
 
 export const initialValues = {
   firstName: '',
@@ -24,46 +26,60 @@ export const initialValues = {
     city: '',
     province: '',
     postalCode: '',
-    country: 'Canada',
+    country: '',
   },
 };
 
-export const validate = yup.object({
-  firstName: yup.string().required("First Name can't be blank"),
-  lastName: yup.string().required("Last Name can't be blank"),
-  email: yup
-    .string()
-    .email('Please provide a valid email.')
-    .required("Email can't be blank"),
-  phone: yup.string().required("Phone Number can't be blank"),
-  canEmail: yup.boolean(),
-  gender: yup.string().required("Gender can't be blank"),
-  ethnicity: yup.string().required("Ethnicity can't be blank"),
-  timezone: yup.string().required("Timezone can't be blank"),
-  size: yup
-    .string()
-    .oneOf(['XS', 'S', 'M', 'L', 'XL'])
-    .required("Size can't be blank"),
-  shippingInfo: yup.lazy((value: typeof initialValues.shippingInfo) =>
-    yup.object(
-      value.isCanadian
-        ? {
-            line1: yup.string().required("Address Line 1 can't be blank"),
-            line2: yup.string().required("Address Line 2 can't be blank"),
-            city: yup.string().required("City can't be blank"),
-            province: yup.string().required("Province can't be blank"),
-            postalCode: yup
-              .string()
-              .matches(
-                /^[A-Z]\d[A-Z]\d[A-Z]\d$/,
-                'Please provide a valid Postal Code (All caps)'
-              )
-              .required("Postal Code can't be blank"),
-          }
-        : undefined
-    )
-  ),
-});
+export const validate = yup.lazy((values) => {
+  let schema = {
+    firstName: yup.string().required("First Name can't be blank"),
+    lastName: yup.string().required("Last Name can't be blank"),
+    email: yup
+      .string()
+      .email('Please provide a valid email.')
+      .required("Email can't be blank"),
+    phone: yup.string().required("Phone Number can't be blank"),
+    canEmail: yup.boolean(),
+    gender: yup.string().required("Gender can't be blank"),
+    ethnicity: yup.string().required("Ethnicity can't be blank"),
+    timezone: yup.string().required("Timezone can't be blank"),
+    shippingInfo: {
+      country: yup.string().required("Country can't be blank"),
+    },
+  } as any;
+
+  if (values.shippingInfo.country !== 'Canada') {
+    schema.shippingInfo = {
+      ...schema.shippingInfo,
+      isCanadian: yup.bool().isFalse(),
+    };
+  }
+
+  if (values.shippingInfo.isCanadian) {
+    schema = {
+      size: yup.string().required("Size can't be blank"),
+      shippingInfo: {
+        ...schema.shippingInfo,
+        line1: yup.string().required("Address Line 1 can't be blank"),
+        line2: yup.string().required("Address Line 2 can't be blank"),
+        city: yup.string().required("City can't be blank"),
+        province: yup.string().required("Province can't be blank"),
+        postalCode: yup
+          .string()
+          .matches(
+            /^[A-Z]\d[A-Z]\d[A-Z]\d$/,
+            'Please provide a valid Postal Code (All caps)'
+          )
+          .required("Postal Code can't be blank"),
+      },
+    };
+  }
+
+  return yup.object({
+    ...schema,
+    shippingInfo: yup.object(schema.shippingInfo),
+  });
+}) as any;
 
 function About(props: SectionProps<typeof initialValues>) {
   const { applyFieldProps } = useFormikHelpers<typeof initialValues>(props);
@@ -77,6 +93,7 @@ function About(props: SectionProps<typeof initialValues>) {
         isCanadian,
         country,
       });
+      setFieldValue('size', '');
     }
   }, [setFieldValue, isCanadian, country]);
 
@@ -180,18 +197,6 @@ function About(props: SectionProps<typeof initialValues>) {
       />
       <Dropdown
         {...applyFieldProps({
-          name: 'size',
-          label: 'Shirt Size',
-          omitOutline: true,
-          required: true,
-        })}
-        options={enums.shirt.map((label) => ({
-          value: label,
-          label,
-        }))}
-      />
-      <Dropdown
-        {...applyFieldProps({
           name: 'shippingInfo.country',
           label: 'Country',
           required: true,
@@ -274,6 +279,18 @@ function About(props: SectionProps<typeof initialValues>) {
               required: true,
             })}
             placeholder='Ex. V4Q3H9'
+          />
+          <Dropdown
+            {...applyFieldProps({
+              name: 'size',
+              label: 'Shirt Size',
+              omitOutline: true,
+              required: true,
+            })}
+            options={enums.shirt.map((label) => ({
+              value: label,
+              label,
+            }))}
           />
         </>
       )}

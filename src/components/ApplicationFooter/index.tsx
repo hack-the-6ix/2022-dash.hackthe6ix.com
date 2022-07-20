@@ -1,5 +1,6 @@
 import { Button, ButtonProps } from '@ht6/react-ui';
 import cx from 'classnames';
+
 import styles from './ApplicationFooter.module.scss';
 
 export interface ApplicationFooterProps {

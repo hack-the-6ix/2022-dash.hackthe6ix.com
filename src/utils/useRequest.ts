@@ -1,5 +1,6 @@
+import { isNil, omitBy } from 'lodash';
 import { useCallback, useRef, useState } from 'react';
-import { omitBy, isNil } from 'lodash';
+
 import { useAuth } from '../components/Authentication/context';
 
 type TokenState = {

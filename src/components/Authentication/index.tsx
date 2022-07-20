@@ -1,15 +1,16 @@
-import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 import { merge } from 'lodash';
+import { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+
 import {
-  abortRequest,
-  request,
   ServerResponse,
   TokenController,
+  abortRequest,
+  request,
 } from '../../utils/useRequest';
 import {
   AuthenticatedAuthContext,
-  UnAuthenticatedAuthContext,
   AuthenticationContext,
+  UnAuthenticatedAuthContext,
   User,
 } from './context';
 
