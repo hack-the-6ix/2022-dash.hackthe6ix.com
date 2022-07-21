@@ -40,7 +40,9 @@ export const validate = yup.object({
   project: yup
     .string()
     // @ts-ignore-next-line
-    .count(200, 'Project Description must be within 200 words')
+    .maxCount(200, 'Project Description must be within 200 words')
+    // @ts-ignore-next-line
+    .minCount(50, 'Project Description must be at least 50 words')
     .required("Project Description can't be blank"),
 });
 

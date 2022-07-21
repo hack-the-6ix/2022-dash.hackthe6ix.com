@@ -33,12 +33,16 @@ export const validate = yup.lazy((value) =>
         accompolish: yup
           .string()
           // @ts-ignore-next-line
-          .count(200, 'Accomplishment Essay must be within 200 words')
+          .maxCount(200, 'Accomplishment Essay must be within 200 words')
+          // @ts-ignore-next-line
+          .minCount(50, 'Accomplishment Essay must be at least 50 words')
           .required("Accomplishment Essay can't be blank"),
         explore: yup
           .string()
           // @ts-ignore-next-line
-          .count(200, 'Technology/Innovation Essay must be within 200 words')
+          .maxCount(200, 'Technology/Innovation Essay must be within 200 words')
+          // @ts-ignore-next-line
+          .minCount(50, 'Technology/Innovation Essay must be at least 50 words')
           .required("Technology/Innovation Essay can't be blank"),
         mlh: yup.bool().isTrue('Please accept the MLH Code of Conduct'),
         mlhShare: yup.bool().isTrue('Please accept the MLH Privacy Policy'),

@@ -16,8 +16,12 @@ function ApplicationFooter({
 }: ApplicationFooterProps) {
   return (
     <div {...props} className={cx(styles.root, className)}>
-      <div>{leftAction && <Button type='button' {...leftAction} />}</div>
-      <div>{rightAction && <Button type='button' {...rightAction} />}</div>
+      <div className={styles.action}>
+        {leftAction && <Button type='button' {...leftAction} />}
+      </div>
+      <div className={styles.action}>
+        {rightAction && <Button type='button' {...rightAction} />}
+      </div>
     </div>
   );
 }

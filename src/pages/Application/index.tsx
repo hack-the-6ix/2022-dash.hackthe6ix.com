@@ -10,8 +10,7 @@ import {
   useState,
 } from 'react';
 import toast from 'react-hot-toast';
-import { useLocation, useNavigate } from 'react-router-dom';
-import * as yup from 'yup';
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import ApplicationFooter, {
   ApplicationFooterProps,
@@ -31,7 +30,8 @@ import { useConfig } from '../../components/Configuration/context';
 import HeadingSection from '../../components/HeadingSection';
 import InfoBanner from '../../components/InfoBanner';
 import TabSection, { Tab } from '../../components/TabSection';
-import { useRequest } from '../../utils/useRequest';
+import { ServerResponse, useRequest } from '../../utils/useRequest';
+import InfoPage from './InfoPage';
 import { deserializeApplication, serializeApplication } from './helpers';
 
 import styles from './Application.module.scss';
@@ -120,10 +120,13 @@ type PageState = {
 };
 
 function ApplicationContent() {
-  const { makeRequest } = useRequest('/api/action/updateapp');
+  const { abort, makeRequest } = useRequest<ServerResponse<string>>(
+    '/api/action/updateapp'
+  );
+  const [showCompleted, setShowCompleted] = useState(false);
   const { enums } = useApplicationData();
   const authCtx = useAuth();
-  const toastRef = useRef({ toastId: 'application', count: 0 });
+  const timer = useRef<number>();
   const { endDate } = useConfig();
   const navigate = useNavigate();
   const location = useLocation();
@@ -133,6 +136,8 @@ function ApplicationContent() {
     const idx = tabs.findIndex((tab) => hash === `#${tab.id}`);
     return idx < 0 ? 0 : idx;
   });
+
+  const isLast = selected === tabs.length - 1;
 
   const formik = useFormik({
     initialValues: {
@@ -144,31 +149,55 @@ function ApplicationContent() {
     validateOnBlur: false,
     async validate(values) {
       try {
-        await tabs[selected].module?.validate.validate(values, {
-          abortEarly: false,
-        });
+        if (isLast) {
+          await Promise.all(
+            tabs.map((tab) =>
+              tab.module?.validate.validate(values, {
+                abortEarly: false,
+              })
+            )
+          );
+        } else {
+          await tabs[selected].module?.validate.validate(values, {
+            abortEarly: false,
+          });
+        }
       } catch (err) {
         return yupToFormErrors(err);
       }
     },
-    async onSubmit(values, { setErrors }) {
-      try {
-        const application = await yup
-          .object()
-          .concat(About.validate)
-          .concat(Experience.validate)
-          .concat(AtHt6.validate)
-          .validate(values, { abortEarly: false });
-        await makeRequest({
+    async onSubmit(values) {
+      window.clearTimeout(timer.current);
+      abort();
+      toast.loading(`${isLast ? 'Submitting' : 'Saving'} application...`, {
+        id: 'application',
+      });
+
+      const [res, isValid] = await Promise.all([
+        makeRequest({
           method: 'POST',
           body: JSON.stringify({
-            submit: false,
-            application,
+            application: serializeApplication(values),
+            submit: isLast,
           }),
-        });
-      } catch (err) {
-        setErrors(yupToFormErrors(err));
-      }
+        }),
+        tabs[selected].module?.validate.isValid(formik.values),
+      ]);
+
+      if (isValid && !isLast) updateUrl(selected + 1);
+
+      timer.current = window.setTimeout(() => {
+        if (res?.status === 200) {
+          setShowCompleted(true);
+          toast.success(`Application ${isLast ? 'Submitted' : 'Saved'}!`, {
+            id: 'application',
+          });
+        } else {
+          toast.error(res?.message ?? 'Unexpected Error', {
+            id: 'application',
+          });
+        }
+      }, 500);
     },
   });
 
@@ -246,6 +275,65 @@ function ApplicationContent() {
     timeZone: 'est',
   }).format(endDate);
 
+  if (!authCtx.isAuthenticated) {
+    return null;
+  }
+
+  if (authCtx.user.status.applied) {
+    return <Navigate to='/home' replace />;
+  }
+
+  if (!authCtx.user.status.canApply) {
+    return (
+      <InfoPage
+        heading='Applications are now closed!'
+        content={
+          <>
+            <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+              Thank you for applying to Hack the 6ix! Your application is
+              currently being reviewed by our HT6 team. Keep an eye on your
+              inbox within the next few weeks for your application results.
+            </Typography>
+          </>
+        }
+        action={{
+          rightAction: {
+            children: 'Back to Home',
+            to: 'https://hackthe6ix.com',
+            as: 'a',
+          },
+        }}
+      />
+    );
+  }
+
+  if (showCompleted) {
+    return (
+      <InfoPage
+        heading='Application Submitted!'
+        content={
+          <>
+            <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+              Thank you for completing the application! You will receive an
+              email confirmation soon.
+            </Typography>
+            <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+              We will send your application results to your email within a few
+              weeks.
+            </Typography>
+          </>
+        }
+        action={{
+          rightAction: {
+            children: 'Back to Home',
+            to: '/home',
+            as: Link,
+          },
+        }}
+      />
+    );
+  }
+
   return (
     <main>
       <form onSubmit={formik?.handleSubmit} className={styles.root} noValidate>
@@ -302,39 +390,7 @@ function ApplicationContent() {
                           children: 'Back',
                         },
                     rightAction: {
-                      children: isLast ? 'Submit' : 'Save & Continue',
-                      async onClick() {
-                        if (isLast) return;
-                        toastRef.current.count++;
-                        toast.loading('Saving application...', {
-                          id: toastRef.current.toastId,
-                        });
-
-                        await makeRequest({
-                          method: 'POST',
-                          body: JSON.stringify({
-                            application: serializeApplication(formik.values),
-                            submit: false,
-                          }),
-                        });
-
-                        if (
-                          await tabs[selected].module?.validate.isValid(
-                            formik.values
-                          )
-                        ) {
-                          updateUrl(key + 1);
-                        }
-
-                        toastRef.current.count--;
-                        window.setTimeout(() => {
-                          if (toastRef.current.count === 0) {
-                            toast.success('Application saved!', {
-                              id: toastRef.current.toastId,
-                            });
-                          }
-                        }, 500);
-                      },
+                      children: isLast ? 'Save & Submit' : 'Save & Continue',
                       type: 'submit',
                     },
                   },

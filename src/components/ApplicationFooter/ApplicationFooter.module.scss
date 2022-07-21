@@ -9,14 +9,18 @@
   grid-gap: 0.5rem;
   display: grid;
 
-  & button {
-    text-transform: uppercase;
+  @include localMixins.media(tablet) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.action {
+  text-transform: uppercase;
+  & > * {
+    text-decoration: none;
   }
 
   @include localMixins.media(tablet) {
-    grid-template-columns: 1fr;
-    & button {
-      width: 100%;
-    }
+    width: 100%;
   }
 }

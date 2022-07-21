@@ -14,7 +14,7 @@ function App() {
   return (
     <Layout>
       <Routes>
-        <Route path='apply' element={<Application />} />
+        <Route path='/' element={<Application />} />
         <Route path='home' element={<Dashboard />} />
         <Route path='callback' element={<Callback />} />
       </Routes>
