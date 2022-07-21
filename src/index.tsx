@@ -1,3 +1,5 @@
+import './utils/yup';
+
 import { StyleProvider } from '@ht6/react-ui';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -7,7 +9,6 @@ import App from './components/App';
 import AuthenticationProvider from './components/Authentication';
 import ConfigurationProvider from './components/Configuration';
 import reportWebVitals from './reportWebVitals';
-import './utils/yup';
 
 const root = createRoot(document.getElementById('root') as HTMLElement);
 root.render(

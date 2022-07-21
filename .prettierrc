@@ -3,5 +3,10 @@
   "jsxSingleQuote": true,
   "importOrderSeparation": true,
   "importOrderSortSpecifiers": true,
-  "importOrder": ["^[A-Za-z@]", "^(.).*(?<!\\.scss)$", "\\.scss$"]
+  "importOrder": [
+    "\\utils/yup$",
+    "^[A-Za-z@]",
+    "^(.).*(?<!\\.scss)$",
+    "\\.scss$"
+  ]
 }
