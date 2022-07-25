@@ -13,7 +13,7 @@ function IconLink({ logo, title, link, description }: IconLinkProps) {
   return (
     <div className={styles.container}>
       <a href={link}>
-        <img src={logo} width='70' height='70' />
+        <img alt={title} src={logo} width='70' height='70' />
       </a>
       <div>
         <Typography textColor='primary-3' textType='heading4' as='h4'>

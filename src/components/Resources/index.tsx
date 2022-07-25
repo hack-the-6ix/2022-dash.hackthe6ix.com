@@ -1,4 +1,4 @@
-import { Button, Typography } from '@ht6/react-ui';
+import { Typography } from '@ht6/react-ui';
 
 function Resources() {
   return (
