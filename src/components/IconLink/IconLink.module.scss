@@ -1,0 +1,11 @@
+@use '../../styles/mixins.module' as localMixins;
+
+.container {
+  grid-template-columns: 0.5fr auto;
+  display: grid;
+  grid-column-gap: 0.5rem;
+
+  h4 {
+    margin-bottom: 0.5rem;
+  }
+}

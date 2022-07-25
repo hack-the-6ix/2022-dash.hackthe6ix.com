@@ -28,9 +28,9 @@ function HeadingSection({
         <Typography
           className={styles.title}
           textColor='primary-3'
-          textType='heading1'
+          textType={props.textType}
           textWeight={700}
-          as='h1'
+          as={props.as}
         >
           {title}
         </Typography>

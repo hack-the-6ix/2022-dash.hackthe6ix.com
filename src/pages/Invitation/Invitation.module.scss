@@ -1,0 +1,34 @@
+@use '../../styles/mixins.module' as localMixins;
+@use '~@ht6/react-ui/dist/styles/mixins.module';
+@use '~@ht6/react-ui/dist/styles/colors.module';
+
+.root {
+  grid-template-columns: 1fr;
+  padding: 3.75rem 0;
+  grid-gap: 3.75rem;
+  display: grid;
+}
+
+.content {
+  box-shadow: 0 0.5rem 0.625rem rgba(0, 0, 0, 0.15);
+  box-sizing: border-box;
+  padding: 5.75rem;
+  z-index: 1;
+
+  @include localMixins.media(tablet) {
+    padding: 2.5rem;
+  }
+
+  h2, p {
+    margin-bottom: 2rem;
+  }
+}
+
+.row {
+  flex-direction: row;
+  display: flex;
+  
+  button {
+    margin-right: 2.5rem;
+  }
+}
