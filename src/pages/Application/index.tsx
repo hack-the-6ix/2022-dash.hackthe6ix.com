@@ -349,6 +349,8 @@ function ApplicationContent() {
             },
             children: 'Sign Out',
           }}
+          textType='heading1'
+          as='h1'
         />
         <TabSection
           onChange={(_, idx) => {
