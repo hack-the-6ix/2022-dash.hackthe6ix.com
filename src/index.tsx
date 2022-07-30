@@ -3,6 +3,7 @@ import './utils/yup';
 import { StyleProvider } from '@ht6/react-ui';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import 'react-notion-x/src/styles.css';
 import { BrowserRouter } from 'react-router-dom';
 
 import App from './components/App';
