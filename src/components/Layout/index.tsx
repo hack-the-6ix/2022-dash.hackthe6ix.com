@@ -28,7 +28,7 @@ function Layout({ children }: LayoutProps) {
   });
 
   return (
-    <>
+    <div className={styles.root}>
       <Section
         containerClassName={styles.nav}
         className={styles.content}
@@ -48,7 +48,7 @@ function Layout({ children }: LayoutProps) {
         </Typography>
       </Section>
       {children}
-    </>
+    </div>
   );
 }
 
