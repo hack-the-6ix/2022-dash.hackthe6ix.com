@@ -299,6 +299,7 @@ function ApplicationContent() {
         action={{
           rightAction: {
             children: 'Accept Invitation',
+            disabled: isLoading,
             async onClick() {
               toast.loading('Updating RSVP...', { id: 'rsvp' });
               const res = await rsvp({
@@ -321,6 +322,7 @@ function ApplicationContent() {
           leftAction: {
             children: 'Decline',
             buttonVariant: 'outline',
+            disabled: isLoading,
             async onClick() {
               toast.loading('Updating RSVP...', { id: 'rsvp' });
               const res = await rsvp({
