@@ -3,12 +3,13 @@ import { useLocation, useNavigate } from 'react-router-dom';
 
 import Protected from '../../components/Authentication/Protected';
 import useAuth from '../../components/Authentication/context';
-import HackerInfo from '../../components/HackerInfo';
+import HackerInfo from './HackerInfo';
 import HeadingSection from '../../components/HeadingSection';
-import Resources from '../../components/Resources';
+import Resources from './Resources';
 import TabSection, { Tab } from '../../components/TabSection';
 
 import styles from './Dashboard.module.scss';
+import { Typography } from '@ht6/react-ui';
 
 const tabs: (Omit<Tab, 'element'> & {
   element: ReactElement;
@@ -26,7 +27,9 @@ const tabs: (Omit<Tab, 'element'> & {
   },
   {
     label: <span>Schedule</span>,
-    element: <div />,
+    element: <Typography as='p' textType='heading3' textColor='primary-3'>
+      Coming Soon uwu
+    </Typography>,
     id: 'schedule',
   },
 ];

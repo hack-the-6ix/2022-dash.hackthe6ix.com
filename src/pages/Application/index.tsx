@@ -120,6 +120,7 @@ type PageState = {
 };
 
 function ApplicationContent() {
+  const { makeRequest: rsvp, isLoading } = useRequest<ServerResponse>('/api/action/rsvp');
   const { abort, makeRequest } = useRequest<ServerResponse<string>>(
     '/api/action/updateapp'
   );
@@ -279,8 +280,67 @@ function ApplicationContent() {
     return null;
   }
 
-  if (authCtx.user.status.applied) {
+  if (authCtx.user.status.confirmed) {
     return <Navigate to='/home' replace />;
+  }
+
+  if (authCtx.user.status.canRSVP) {
+    return (
+      <InfoPage
+        heading='Hacker Invitation'
+        content={
+          <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+            Congratulations and welcome to Hack the 6ix 2022! We are excited to offer
+            you the opportunity to hack with us! To confirm your attendance, please RSVP below.
+          </Typography>
+        }
+        action={{
+          rightAction: {
+            children: 'Accept Invitation',
+            async onClick() {
+              toast.loading('Updating RSVP...', { id: 'rsvp' });
+              const res = await rsvp({
+                method: 'POST',
+                body: JSON.stringify({
+                  attending: true,
+                }),
+              });
+
+              if (res?.status !== 200) {
+                toast.error(res?.message ?? 'Unexpected Error', {
+                  id: 'rsvp',
+                });
+              } else {
+                toast.success('Attendance Accepted!', { id: 'rsvp' });
+                navigate('/home');
+              }
+            },
+          },
+          leftAction: {
+            children: 'Decline',
+            buttonVariant: 'outline',
+            async onClick() {
+              toast.loading('Updating RSVP...', { id: 'rsvp' });
+              const res = await rsvp({
+                method: 'POST',
+                body: JSON.stringify({
+                  attending: false,
+                }),
+              });
+
+              if (res?.status !== 200) {
+                toast.error(res?.message ?? 'Unexpected Error', {
+                  id: 'rsvp',
+                });
+              } else {
+                toast.success('Attendance Declined :c', { id: 'rsvp' });
+                window.location.reload();
+              }
+            },
+          },
+        }}
+      />
+    );
   }
 
   if (!authCtx.user.status.canApply) {
@@ -299,7 +359,7 @@ function ApplicationContent() {
         action={{
           rightAction: {
             children: 'Back to Home',
-            to: 'https://hackthe6ix.com',
+            href: 'https://hackthe6ix.com',
             as: 'a',
           },
         }}
@@ -307,7 +367,14 @@ function ApplicationContent() {
     );
   }
 
-  if (showCompleted) {
+  const userIsEligible = [
+    !authCtx.user.status.rejected,
+    !authCtx.user.status.declined,
+    authCtx.user.status.applied,
+    authCtx.user.status.isRSVPOpen,
+  ].every(Boolean);
+
+  if (showCompleted || userIsEligible) {
     return (
       <InfoPage
         heading='Application Submitted!'
@@ -334,13 +401,36 @@ function ApplicationContent() {
     );
   }
 
+  if (!authCtx.user.status.canApply) {
+    return (
+      <InfoPage
+        heading='Applications are now closed!'
+        content={
+          <>
+            <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+              Thank you for applying to Hack the 6ix! Unfortunately applications
+              are currently closed. We look forward to seeing you next year!
+            </Typography>
+          </>
+        }
+        action={{
+          rightAction: {
+            children: 'Back to Home',
+            href: 'https://hackthe6ix.com',
+            as: 'a',
+          },
+        }}
+      />
+    );
+  }
+
   return (
     <main>
       <form onSubmit={formik?.handleSubmit} className={styles.root} noValidate>
         <HeadingSection
           title='Hacker Application'
           description={`Applications close on ${formattedDate} at ${formattedTime}.
-            Your progress is saved every few minutes. Once you've submitted
+            Your progress is saved after every step. Once you've submitted
             your application, keep an eye on your inbox for your application results!`}
           action={{
             onClick: async () => {

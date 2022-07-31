@@ -11,11 +11,9 @@ interface IconLinkProps {
 
 function IconLink({ logo, title, link, description }: IconLinkProps) {
   return (
-    <div className={styles.container}>
-      <a href={link}>
-        <img alt={title} src={logo} width='70' height='70' />
-      </a>
-      <div>
+    <a href={link} target='_blank' rel='noreferrer noopener' className={styles.container}>
+      <img className={styles.icon} alt={title} src={logo} />
+      <div className={styles.content}>
         <Typography textColor='primary-3' textType='heading4' as='h4'>
           {title}
         </Typography>
@@ -23,7 +21,7 @@ function IconLink({ logo, title, link, description }: IconLinkProps) {
           {description}
         </Typography>
       </div>
-    </div>
+    </a>
   );
 }
 
