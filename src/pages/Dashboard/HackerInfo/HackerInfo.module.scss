@@ -39,7 +39,8 @@
   border: none;
   width: 100%;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     filter: brightness(0.96);
   }
 

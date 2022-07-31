@@ -120,7 +120,8 @@ type PageState = {
 };
 
 function ApplicationContent() {
-  const { makeRequest: rsvp, isLoading } = useRequest<ServerResponse>('/api/action/rsvp');
+  const { makeRequest: rsvp, isLoading } =
+    useRequest<ServerResponse>('/api/action/rsvp');
   const { abort, makeRequest } = useRequest<ServerResponse<string>>(
     '/api/action/updateapp'
   );
@@ -290,8 +291,9 @@ function ApplicationContent() {
         heading='Hacker Invitation'
         content={
           <Typography textType='paragraph1' textColor='copy-dark' as='p'>
-            Congratulations and welcome to Hack the 6ix 2022! We are excited to offer
-            you the opportunity to hack with us! To confirm your attendance, please RSVP below.
+            Congratulations and welcome to Hack the 6ix 2022! We are excited to
+            offer you the opportunity to hack with us! To confirm your
+            attendance, please RSVP below.
           </Typography>
         }
         action={{

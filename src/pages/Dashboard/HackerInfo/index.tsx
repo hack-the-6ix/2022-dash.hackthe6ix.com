@@ -1,12 +1,12 @@
 import { Button, Typography } from '@ht6/react-ui';
 import { MouseEvent } from 'react';
-import { HiClipboard } from 'react-icons/hi';
 import toast from 'react-hot-toast';
+import { HiClipboard } from 'react-icons/hi';
 import { Navigate } from 'react-router-dom';
 
 import useAuth from '../../../components/Authentication/context';
-import { ServerResponse, useRequest } from '../../../utils/useRequest';
 import IconLink from '../../../components/IconLink';
+import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
 
@@ -32,7 +32,8 @@ const links = [
 ];
 
 function HackerInfo() {
-  const { makeRequest, isLoading } = useRequest<ServerResponse>('/api/action/rsvp');
+  const { makeRequest, isLoading } =
+    useRequest<ServerResponse>('/api/action/rsvp');
   const authCtx = useAuth();
 
   if (!authCtx.isAuthenticated) {
@@ -74,8 +75,10 @@ function HackerInfo() {
               window.location.reload();
             } else {
               toast.error(
-                `${res?.message ?? 'An error occurred.'} Please try again later.`,
-                { id: 'rsvp-home' },
+                `${
+                  res?.message ?? 'An error occurred.'
+                } Please try again later.`,
+                { id: 'rsvp-home' }
               );
             }
           }}
@@ -98,9 +101,7 @@ function HackerInfo() {
         <div className={styles.copy}>
           <Typography
             onClick={(e: MouseEvent<HTMLInputElement>) => {
-              navigator.clipboard.writeText(
-                e.currentTarget.value,
-              );
+              navigator.clipboard.writeText(e.currentTarget.value);
               toast.success('Copied to clipboard!');
             }}
             className={styles.command}
@@ -110,7 +111,7 @@ function HackerInfo() {
             as='input'
             readOnly
           />
-          <HiClipboard className={styles.icon}/>
+          <HiClipboard className={styles.icon} />
         </div>
       </div>
       <div>
@@ -121,7 +122,7 @@ function HackerInfo() {
           <ul className={styles.links}>
             {links.map((link, idx) => (
               <li key={idx}>
-                <IconLink {...link}/>
+                <IconLink {...link} />
               </li>
             ))}
           </ul>

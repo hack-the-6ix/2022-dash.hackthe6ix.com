@@ -9,7 +9,8 @@
   display: grid;
   grid-gap: 1rem;
 
-  &:hover, &:focus {
+  &:hover,
+  &:focus {
     transform: scale(1.05);
   }
 }
