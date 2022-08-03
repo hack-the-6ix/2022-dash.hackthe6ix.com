@@ -315,9 +315,11 @@ function ApplicationContent() {
               const res = await rsvp({
                 method: 'POST',
                 body: JSON.stringify({
-                  attending: true,
-                  form: {
-                    remindInpersonRSVP: inPerson,
+                  rsvp: {
+                    attending: true,
+                    form: {
+                      remindInPersonRSVP: inPerson,
+                    },
                   },
                 }),
               });

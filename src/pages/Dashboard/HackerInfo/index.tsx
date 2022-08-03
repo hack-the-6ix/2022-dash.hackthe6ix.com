@@ -93,7 +93,9 @@ function HackerInfo() {
                 const res = await makeRequest({
                   method: 'POST',
                   body: JSON.stringify({
-                    attending: false,
+                    rsvp: {
+                      attending: false,
+                    },
                   }),
                 });
 
