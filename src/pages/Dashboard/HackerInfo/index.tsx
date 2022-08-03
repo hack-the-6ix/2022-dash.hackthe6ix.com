@@ -5,7 +5,9 @@ import { HiClipboard } from 'react-icons/hi';
 import { Navigate } from 'react-router-dom';
 
 import useAuth from '../../../components/Authentication/context';
+import Card from '../../../components/Card';
 import IconLink from '../../../components/IconLink';
+import { showQrCode, startDate } from '../../../config';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
@@ -43,6 +45,12 @@ function HackerInfo() {
   const email = authCtx.user.email;
   const userConfirmed = authCtx.user.status.confirmed;
 
+  const dateFormat = new Intl.DateTimeFormat('en-CA', {
+    month: 'short',
+    day: 'numeric',
+  });
+  
+
   return (
     <div className={styles.container}>
       {!userConfirmed && <Navigate replace to='/' />}
@@ -54,37 +62,54 @@ function HackerInfo() {
           Welcome to Hack the 6ix 2022! Thanks for confirming your attendance as
           a hacker!
         </Typography>
-        <Typography textColor='primary-3' textType='paragraph1' as='p'>
-          If you can no longer attend Hack the 6ix, please let us know so we can
-          pass this opportunity to a waitlisted participant.
-        </Typography>
-        <Button
-          buttonVariant='outline'
-          disabled={isLoading}
-          onClick={async () => {
-            toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
-            const res = await makeRequest({
-              method: 'POST',
-              body: JSON.stringify({
-                attending: false,
-              }),
-            });
+        {showQrCode ? (
+          <>
+            <Typography textColor='primary-3' textType='paragraph1' textWeight='bold' as='p'>
+              Scan the QR code on {dateFormat.format(startDate)} to check in:
+            </Typography>
+            <Card className={styles.qrBox}>
+              <img
+                src={require('../../../assets/placeholder.gif')}
+                alt="placeholder QR code"
+                className={styles.qr}
+              />
+            </Card>
+          </>
+        ) : (
+          <>
+            <Typography textColor='primary-3' textType='paragraph1' as='p'>
+              If you can no longer attend Hack the 6ix, please let us know so we can
+              pass this opportunity to a waitlisted participant.
+            </Typography>
+            <Button
+              buttonVariant='outline'
+              disabled={isLoading}
+              onClick={async () => {
+                toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
+                const res = await makeRequest({
+                  method: 'POST',
+                  body: JSON.stringify({
+                    attending: false,
+                  }),
+                });
 
-            if (res?.status === 200) {
-              toast.success('RSVP cancelled', { id: 'rsvp-home' });
-              window.location.reload();
-            } else {
-              toast.error(
-                `${
-                  res?.message ?? 'An error occurred.'
-                } Please try again later.`,
-                { id: 'rsvp-home' }
-              );
-            }
-          }}
-        >
-          I CAN NO LONGER ATTEND HT6
-        </Button>
+                if (res?.status === 200) {
+                  toast.success('RSVP cancelled', { id: 'rsvp-home' });
+                  window.location.reload();
+                } else {
+                  toast.error(
+                    `${
+                      res?.message ?? 'An error occurred.'
+                    } Please try again later.`,
+                    { id: 'rsvp-home' }
+                  );
+                }
+              }}
+            >
+              I CAN NO LONGER ATTEND HT6
+            </Button>
+          </>
+        )}
       </div>
       <div>
         <Typography textColor='primary-3' textType='heading3' as='h3'>
