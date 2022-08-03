@@ -9,7 +9,11 @@ export type User = {
   firstName: string;
   lastName: string;
   fullName: string;
-  hackerApplication: any; // TODO: Typing for this
+  hackerApplication: any;
+  rsvpForm: {
+    remindInPersonRSVP: boolean;
+    selectedCompanies: string[];
+  };
   roles: {
     hacker: boolean;
     admin: boolean;
@@ -90,13 +94,7 @@ export function useAuth() {
     if (ctx.isAuthenticated) {
       ctx.user = {
         ...ctx.user,
-        status: {
-          ...ctx.user.status,
-          confirmed: true,
-        },
       };
-
-      console.log(ctx);
     }
   }
 

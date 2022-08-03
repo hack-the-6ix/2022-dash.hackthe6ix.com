@@ -66,3 +66,17 @@
   pointer-events: none;
   filter: blur(0.125rem) saturate(0);
 }
+
+.qrBox {
+  background-color: localColors.$bg-light-grey;
+  justify-content: center;
+  display: flex;
+  border-radius: 1.25rem;
+  box-shadow: none;
+  padding: 1.25rem;
+}
+
+.qr {
+  width: 9.25rem;
+  height: 9.25rem;
+}
