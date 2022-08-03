@@ -83,7 +83,24 @@ export const AuthenticationContext = createContext<AuthContext>({
 });
 
 export function useAuth() {
-  return useContext(AuthenticationContext);
+  const ctx = useContext(AuthenticationContext);
+
+  // ! DEBUG STUFF
+  if (process.env.NODE_ENV === 'development') {
+    if (ctx.isAuthenticated) {
+      ctx.user = {
+        ...ctx.user,
+        status: {
+          ...ctx.user.status,
+          confirmed: true,
+        },
+      };
+
+      console.log(ctx);
+    }
+  }
+
+  return ctx;
 }
 
 export default useAuth;

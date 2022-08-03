@@ -1,12 +1,13 @@
+import { Typography } from '@ht6/react-ui';
 import { ReactElement, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 import Protected from '../../components/Authentication/Protected';
 import useAuth from '../../components/Authentication/context';
-import HackerInfo from '../../components/HackerInfo';
 import HeadingSection from '../../components/HeadingSection';
-import Resources from '../../components/Resources';
 import TabSection, { Tab } from '../../components/TabSection';
+import HackerInfo from './HackerInfo';
+import Resources from './Resources';
 
 import styles from './Dashboard.module.scss';
 
@@ -26,7 +27,11 @@ const tabs: (Omit<Tab, 'element'> & {
   },
   {
     label: <span>Schedule</span>,
-    element: <div />,
+    element: (
+      <Typography as='p' textType='heading3' textColor='primary-3'>
+        Coming Soon uwu
+      </Typography>
+    ),
     id: 'schedule',
   },
 ];

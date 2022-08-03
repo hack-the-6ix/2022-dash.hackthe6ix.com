@@ -6,7 +6,6 @@ import { Route, Routes } from 'react-router-dom';
 import Application from '../../pages/Application';
 import Callback from '../../pages/Callback';
 import Dashboard from '../../pages/Dashboard';
-import Invitation from '../../pages/Invitation';
 import Layout from '../Layout';
 
 import styles from './App.module.scss';
@@ -17,7 +16,6 @@ function App() {
       <Routes>
         <Route path='/' element={<Application />} />
         <Route path='home' element={<Dashboard />} />
-        <Route path='invite' element={<Invitation />} />
         <Route path='callback' element={<Callback />} />
       </Routes>
 
