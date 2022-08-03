@@ -120,7 +120,7 @@ type PageState = {
 };
 
 function ApplicationContent() {
-  const [ inPerson, setInPerson ] = useState(false);
+  const [inPerson, setInPerson] = useState(false);
   const { makeRequest: rsvp, isLoading } =
     useRequest<ServerResponse>('/api/action/rsvp');
   const { abort, makeRequest } = useRequest<ServerResponse<string>>(
@@ -293,13 +293,13 @@ function ApplicationContent() {
         content={
           <>
             <Typography textType='paragraph1' textColor='copy-dark' as='p'>
-              Congratulations and welcome to Hack the 6ix 2022! We are excited to
-              offer you the opportunity to hack with us! To confirm your
+              Congratulations and welcome to Hack the 6ix 2022! We are excited
+              to offer you the opportunity to hack with us! To confirm your
               attendance, please RSVP below.
             </Typography>
             <Checkbox
               label='I would like to be notified through e-mail when in-person hacking RSVPs are open on August 14th at 1PM EST'
-              onChange={e => setInPerson(!inPerson)}
+              onChange={(e) => setInPerson(!inPerson)}
               name='remind-in-person'
               checked={inPerson}
               color='primary-3'

@@ -49,7 +49,6 @@ function HackerInfo() {
     month: 'short',
     day: 'numeric',
   });
-  
 
   return (
     <div className={styles.container}>
@@ -64,13 +63,18 @@ function HackerInfo() {
         </Typography>
         {showQrCode ? (
           <>
-            <Typography textColor='primary-3' textType='paragraph1' textWeight='bold' as='p'>
+            <Typography
+              textColor='primary-3'
+              textType='paragraph1'
+              textWeight='bold'
+              as='p'
+            >
               Scan the QR code on {dateFormat.format(startDate)} to check in:
             </Typography>
             <Card className={styles.qrBox}>
               <img
                 src={require('../../../assets/placeholder.gif')}
-                alt="placeholder QR code"
+                alt='placeholder QR code'
                 className={styles.qr}
               />
             </Card>
@@ -78,8 +82,8 @@ function HackerInfo() {
         ) : (
           <>
             <Typography textColor='primary-3' textType='paragraph1' as='p'>
-              If you can no longer attend Hack the 6ix, please let us know so we can
-              pass this opportunity to a waitlisted participant.
+              If you can no longer attend Hack the 6ix, please let us know so we
+              can pass this opportunity to a waitlisted participant.
             </Typography>
             <Button
               buttonVariant='outline'
