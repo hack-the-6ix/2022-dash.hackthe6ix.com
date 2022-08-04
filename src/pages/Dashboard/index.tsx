@@ -1,6 +1,6 @@
 import { Typography } from '@ht6/react-ui';
 import { ReactElement, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 
 import Protected from '../../components/Authentication/Protected';
 import useAuth from '../../components/Authentication/context';
@@ -23,6 +23,7 @@ const tabs: (Omit<Tab, 'element'> & {
   {
     label: <span>Resources</span>,
     element: <Resources />,
+    disabled: true,
     id: 'resources',
   },
   {
@@ -32,6 +33,7 @@ const tabs: (Omit<Tab, 'element'> & {
         Coming Soon uwu
       </Typography>
     ),
+    disabled: true,
     id: 'schedule',
   },
 ];
@@ -51,6 +53,7 @@ function DashboardContent() {
     return null;
   }
 
+  const userConfirmed = authCtx.user.status.confirmed;
   const firstName = authCtx.user.firstName;
 
   const updateUrl = (idx: number) => {
@@ -60,6 +63,10 @@ function DashboardContent() {
     navigate(`${location.pathname}#${tab.id}`, { replace: true });
     setSelected(idx);
   };
+
+  if (!userConfirmed) {
+    return <Navigate replace to='/' />;
+  }
 
   return (
     <main className={styles.root}>
