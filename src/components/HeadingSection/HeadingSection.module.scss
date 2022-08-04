@@ -1,7 +1,13 @@
+@use '../../styles/mixins.module' as localMixins;
+
 .container {
   grid-template-columns: auto max-content;
   grid-gap: 1rem;
   display: grid;
+
+  @include localMixins.media(tablet) {
+    grid-template-columns: 1fr;
+  }
 }
 
 .content {
@@ -11,7 +17,8 @@
 }
 
 .title {
-  letter-spacing: 0.085rem;
+  letter-spacing: 0.085rem !important;
+  word-break: break-word;
 }
 
 .action {

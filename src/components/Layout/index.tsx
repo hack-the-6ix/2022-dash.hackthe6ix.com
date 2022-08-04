@@ -1,9 +1,11 @@
 import { Typography } from '@ht6/react-ui/dist/esm';
 import { HTMLAttributes } from 'react';
+
+import { ReactComponent as Logo } from '../../assets/logo.svg';
 import { useConfig } from '../Configuration/context';
 import Highlight from '../Highlight';
 import Section from '../Section';
-import { ReactComponent as Logo } from '../../assets/logo.svg';
+
 import styles from './Layout.module.scss';
 
 export interface LayoutProps extends HTMLAttributes<HTMLDivElement> {}

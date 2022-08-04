@@ -1,11 +1,50 @@
 import { createContext, useContext } from 'react';
 
 // TODO: User typing as needed
-export type User = any;
+export type User = {
+  computedApplicationDeadline: number;
+  computedRSVPDeadline: number;
+  created: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  hackerApplication: any;
+  rsvpForm: {
+    remindInPersonRSVP: boolean;
+    selectedCompanies: string[];
+  };
+  roles: {
+    hacker: boolean;
+    admin: boolean;
+    organizer: boolean;
+    volunteer: boolean;
+  };
+  status: {
+    textStatus: string;
+    accepted: boolean;
+    applicationExpired: boolean;
+    applied: boolean;
+    canAmendTeam: boolean;
+    canApply: boolean;
+    canRSVP: boolean;
+    checkedIn: boolean;
+    confirmed: boolean;
+    declined: boolean;
+    isRSVPOpen: boolean;
+    rejected: boolean;
+    rsvpExpired: boolean;
+    waitlisted: boolean;
+  };
+  _id: string;
+};
 
 export type BaseAuthContext = {
+  updateUserApplication: (
+    payload: Partial<Pick<User, 'hackerApplication' | 'status'>>
+  ) => void;
   setAuth: (token: string, refreshToken: string) => Promise<void>;
-  refreshAuth: () => Promise<string | void>;
+  refreshAuth: () => Promise<{ token: string; refreshToken: string } | void>;
   revokeAuth: () => Promise<void>;
   isReady: boolean;
 };
@@ -37,17 +76,29 @@ export type AuthContext = BaseAuthContext &
   (AuthenticatedAuthContext | UnAuthenticatedAuthContext);
 
 export const AuthenticationContext = createContext<AuthContext>({
+  updateUserApplication: async () => {},
   refreshAuth: async () => {},
   revokeAuth: async () => {},
   setAuth: async () => {},
   isAuthenticating: false,
   isAuthenticated: false,
   isRefreshing: false,
-  isReady: false,
+  isReady: true,
 });
 
 export function useAuth() {
-  return useContext(AuthenticationContext);
+  const ctx = useContext(AuthenticationContext);
+
+  // ! DEBUG STUFF
+  if (process.env.NODE_ENV === 'development') {
+    if (ctx.isAuthenticated) {
+      ctx.user = {
+        ...ctx.user,
+      };
+    }
+  }
+
+  return ctx;
 }
 
 export default useAuth;

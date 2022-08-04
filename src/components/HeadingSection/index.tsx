@@ -1,7 +1,9 @@
 import { Button, ButtonProps, Typography } from '@ht6/react-ui';
-import { ReactNode } from 'react';
 import cx from 'classnames';
+import { ReactNode } from 'react';
+
 import Section from '../Section';
+
 import styles from './HeadingSection.module.scss';
 
 export type HeadingSectionProps = {
@@ -26,9 +28,9 @@ function HeadingSection({
         <Typography
           className={styles.title}
           textColor='primary-3'
-          textType='heading1'
+          textType={props.textType}
           textWeight={700}
-          as='h1'
+          as={props.as}
         >
           {title}
         </Typography>

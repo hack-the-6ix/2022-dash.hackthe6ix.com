@@ -1,13 +1,57 @@
+import { isNil, omitBy } from 'lodash';
 import { useCallback, useRef, useState } from 'react';
+
 import { useAuth } from '../components/Authentication/context';
 
-export function request(path: string, payload?: RequestInit) {
+type TokenState = {
+  refreshToken: string;
+  token: string;
+};
+
+export type ServerResponse<T = any, F = number> = {
+  message: T;
+  status: F;
+};
+
+export class TokenController {
+  static get(): Partial<TokenState> {
+    return {
+      refreshToken: localStorage.getItem('refreshToken') ?? undefined,
+      token: localStorage.getItem('token') ?? undefined,
+    };
+  }
+
+  static set(state: TokenState) {
+    localStorage.setItem('refreshToken', state.refreshToken);
+    localStorage.setItem('token', state.token);
+  }
+
+  static clear() {
+    localStorage.removeItem('refreshToken');
+    localStorage.removeItem('token');
+  }
+}
+
+const controllers: { [ref: string]: AbortController } = {};
+export function abortRequest(ref: string) {
+  controllers[ref]?.abort();
+}
+export function request(path: string, payload?: RequestInit, ref?: string) {
+  if (ref) {
+    abortRequest(ref);
+    controllers[ref] = new AbortController();
+  }
+
   return fetch(`${process.env.REACT_APP_API_URL}${path ?? ''}`, {
     ...payload,
-    headers: {
-      ...payload?.headers,
-      'content-type': 'application/json',
-    },
+    headers: omitBy(
+      {
+        'content-type': 'application/json',
+        ...payload?.headers,
+      },
+      isNil
+    ) as any,
+    signal: ref ? controllers[ref]?.signal : null,
   });
 }
 
@@ -36,45 +80,73 @@ export function useRequest<T>(
     data: initData,
   });
 
+  const requestCtx = useRef({
+    isLoading: state.isLoading,
+    ...authContext,
+  });
+
+  requestCtx.current = {
+    isLoading: state.isLoading,
+    ...authContext,
+  };
+
   const makeRequest = useCallback(
     async (_payload?: RequestInit) => {
       // Clean up stuff
-      if (state.isLoading) {
+      if (requestCtx.current.isLoading) {
         console.warn(`Request to ${path} is already in progress`);
         if (debounce) return;
-        controller.current?.abort();
       }
+
+      controller.current?.abort();
 
       // Setup request overhead stuff
       controller.current = new AbortController();
       setState({ isLoading: true });
 
-      // Make request
-      const res = await request(path, {
-        ...payload,
-        ..._payload,
-        headers: {
-          ...payload?.headers,
-          ..._payload?.headers,
-          ...(authContext.isAuthenticated
-            ? {
-                authorization: `bearer ${authContext.token}`,
-              }
-            : {}),
-        },
-        signal: controller.current.signal,
-      });
+      const run = () =>
+        request(path, {
+          ...payload,
+          ..._payload,
+          headers: {
+            ...payload?.headers,
+            ..._payload?.headers,
+            ...(requestCtx.current.isAuthenticated
+              ? {
+                  'x-access-token': requestCtx.current.token,
+                }
+              : {}),
+          },
+          signal: controller.current?.signal,
+        });
+
+      let res = await run();
+
+      // Token has failed, refresh it
+      if (res.status === 401) {
+        await requestCtx.current.refreshAuth();
+        res = await run();
+      }
 
       // Done
+      const _data = await res.json();
       setState({
-        data: await res.json(),
         isLoading: false,
+        data: _data,
       });
+
+      return _data as T;
     },
-    [state.isLoading, authContext.isAuthenticated]
+    [debounce, path, payload]
   );
+
+  const abort = useCallback(() => {
+    controller.current?.abort();
+  }, []);
 
   return {
     makeRequest,
+    abort,
+    ...state,
   };
 }
