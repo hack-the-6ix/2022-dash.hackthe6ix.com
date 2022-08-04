@@ -362,6 +362,87 @@ function ApplicationContent() {
     );
   }
 
+  if(authCtx.user.status.declined) {
+    return (
+        <InfoPage
+            heading='You have declined'
+            content={
+              <>
+                <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+                  We're sorry to hear that you aren't able to attend Hack the 6ix this
+                  year. Thank you for applying and we hope to see you again next year!
+                </Typography>
+              </>
+            }
+            action={{
+              rightAction: {
+                children: 'Back to Home',
+                href: 'https://hackthe6ix.com',
+                as: 'a',
+              },
+            }}
+        />
+    );
+  }
+
+  if(authCtx.user.status.waitlisted) {
+    return (
+        <InfoPage
+            heading="You're on the waitlist"
+            content={
+              <>
+                <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+                  Thank you for your application for Hack the 6ix. We were very
+                  impressed with your application, resume, and accomplishments. However,
+                  due to the immense number of applications that we received this year,
+                  we are only able to offer you a conditional waitlist acceptance at
+                  this time.
+                </Typography>
+                <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+                  We would love to see you at our event and you will be
+                  notified via e-mail as soon as more space opens up!
+                </Typography>
+              </>
+            }
+            action={{
+              rightAction: {
+                children: 'Back to Home',
+                href: 'https://hackthe6ix.com',
+                as: 'a',
+              },
+            }}
+        />
+    );
+  }
+
+  if(authCtx.user.status.rejected) {
+    return (
+        <InfoPage
+            heading='Application Status'
+            content={
+              <>
+                <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+                  Unfortunately, due to the overwhelming number of applications that we have received,
+                  we are not able to offer you admission to this year's hackathon. We know putting together
+                  an application takes time and effort, and we sincerely appreciate your interest.
+                </Typography>
+                <Typography textType='paragraph1' textColor='copy-dark' as='p'>
+                  Thank you once again for your time and interest in Hack the 6ix; we wish you
+                  all the best and hope to see you next year!
+                </Typography>
+              </>
+            }
+            action={{
+              rightAction: {
+                children: 'Back to Home',
+                href: 'https://hackthe6ix.com',
+                as: 'a',
+              },
+            }}
+        />
+    );
+  }
+
   if (!authCtx.user.status.canApply) {
     return (
       <InfoPage
