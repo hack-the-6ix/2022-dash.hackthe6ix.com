@@ -40,8 +40,12 @@
 }
 
 .toast {
-  grid-template-columns: auto auto;
+  grid-template-columns: auto;
   align-items: center;
   grid-gap: 0.5rem;
   display: grid;
+}
+
+.icon {
+  grid-template-columns: auto auto;
 }
