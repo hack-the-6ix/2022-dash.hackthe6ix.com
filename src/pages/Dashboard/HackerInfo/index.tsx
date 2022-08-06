@@ -1,4 +1,5 @@
 import { Button, Typography } from '@ht6/react-ui';
+import cx from 'classnames';
 import { MouseEvent, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { HiClipboard } from 'react-icons/hi';
@@ -6,29 +7,31 @@ import { HiClipboard } from 'react-icons/hi';
 import useAuth from '../../../components/Authentication/context';
 import Card from '../../../components/Card';
 import IconLink from '../../../components/IconLink';
-import { startDate } from '../../../config';
+import {inPersonDate} from '../../../config';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
 
 const links = [
   {
+    logo: require('../../../assets/discord.png'),
+    title: 'Discord',
+    link: 'https://discord.com/invite/ZZm2Ycu7UH',
+    description: 'Connect with hackers, mentors and sponsors!',
+  },
+  {
     logo: require('../../../assets/hopin.png'),
     title: 'Hopin',
     link: '#',
     description: 'All our live events and workshops are here!',
-  },
-  {
-    logo: require('../../../assets/discord.png'),
-    title: 'Discord',
-    link: '#',
-    description: 'Connect with hackers, mentors and sponsors!',
+    disabled: true,
   },
   {
     logo: require('../../../assets/devpost.png'),
     title: 'Devpost',
     link: '#',
     description: 'Submit your projects here!',
+    disabled: true,
   },
 ];
 
@@ -56,6 +59,28 @@ function HackerInfo() {
     day: 'numeric',
   });
 
+  const unrsvp = async () => {
+    toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
+    const res = await makeRequest({
+      method: 'POST',
+      body: JSON.stringify({
+        rsvp: {
+          attending: false,
+        },
+      }),
+    });
+
+    if (res?.status === 200) {
+      toast.success('RSVP cancelled', { id: 'rsvp-home' });
+      window.location.reload();
+    } else {
+      toast.error(
+        `${res?.message ?? 'An error occurred.'} Please try again later.`,
+        { id: 'rsvp-home' }
+      );
+    }
+  };
+
   return (
     <div className={styles.container}>
       <div>
@@ -74,7 +99,7 @@ function HackerInfo() {
               textWeight='bold'
               as='p'
             >
-              Scan the QR code on {dateFormat.format(startDate)} to check in:
+              Scan the QR code on {dateFormat.format(inPersonDate)} to check in:
             </Typography>
             <Card className={styles.qrBox}>
               <img
@@ -94,29 +119,33 @@ function HackerInfo() {
         <Button
           buttonVariant='outline'
           disabled={isLoading}
-          onClick={async () => {
-            toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
-            const res = await makeRequest({
-              method: 'POST',
-              body: JSON.stringify({
-                rsvp: {
-                  attending: false,
-                },
-              }),
-            });
-
-            if (res?.status === 200) {
-              toast.success('RSVP cancelled', { id: 'rsvp-home' });
-              window.location.reload();
-            } else {
-              toast.error(
-                `${
-                  res?.message ?? 'An error occurred.'
-                } Please try again later.`,
-                { id: 'rsvp-home' }
-              );
-            }
-          }}
+          onClick={() =>
+            toast(
+              <div>
+                <p>Are you sure you want to un-RSVP?</p>
+                <div className={styles.actions}>
+                  <Button
+                    onClick={unrsvp}
+                    className={styles.action}
+                    buttonColor='success'
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    onClick={() => toast.dismiss('rsvp-home')}
+                    className={styles.action}
+                    buttonColor='error'
+                  >
+                    No
+                  </Button>
+                </div>
+              </div>,
+              {
+                id: 'rsvp-home',
+                duration: 30000,
+              }
+            )
+          }
         >
           I CAN NO LONGER ATTEND HT6
         </Button>
@@ -151,12 +180,12 @@ function HackerInfo() {
       </div>
       <div>
         <Typography textColor='primary-3' textType='heading3' as='h3'>
-          USEFUL LINKS (COMING SOON)
+          USEFUL LINKS
         </Typography>
         <div>
           <ul className={styles.links}>
             {links.map((link, idx) => (
-              <li key={idx}>
+              <li className={cx(link.disabled && styles.disabled)} key={idx}>
                 <IconLink {...link} />
               </li>
             ))}

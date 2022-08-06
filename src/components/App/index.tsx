@@ -1,5 +1,6 @@
 import { Typography } from '@ht6/react-ui';
 import '@ht6/react-ui/dist/styles/index.css';
+import cx from 'classnames';
 import { ToastBar, Toaster } from 'react-hot-toast';
 import { Route, Routes } from 'react-router-dom';
 
@@ -22,14 +23,17 @@ function App() {
       <Toaster position='bottom-right'>
         {(t) => (
           <ToastBar toast={t}>
-            {({ icon, message }) => (
-              <div className={styles.toast}>
-                <span>{icon}</span>
-                <Typography textType='paragraph2' textWeight={600}>
-                  {message}
-                </Typography>
-              </div>
-            )}
+            {({ icon, message }) => {
+              const hasIcon = !['blank', 'custom'].includes(t.type);
+              return (
+                <div className={cx(hasIcon && styles.icon, styles.toast)}>
+                  {hasIcon && <span>{icon}</span>}
+                  <Typography textType='paragraph2' textWeight={600}>
+                    {message}
+                  </Typography>
+                </div>
+              );
+            }}
           </ToastBar>
         )}
       </Toaster>

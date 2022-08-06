@@ -61,10 +61,12 @@
   @include localMixins.media(laptop) {
     grid-template-columns: 1fr;
   }
+}
 
-  // ! REMOVE WHEN WE GET INFO
+.disabled {
   pointer-events: none;
   filter: blur(0.125rem) saturate(0);
+  opacity: 0.2;
 }
 
 .qrBox {
@@ -79,4 +81,16 @@
 .qr {
   width: 9.25rem;
   height: 9.25rem;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: auto auto;
+  margin-top: 0.25rem;
+  grid-gap: 0.25rem;
+}
+
+.action {
+  font-size: 0.75rem;
+  padding: 0.3rem 1rem;
 }
