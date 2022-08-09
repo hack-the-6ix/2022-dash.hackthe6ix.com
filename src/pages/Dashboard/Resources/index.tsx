@@ -1,5 +1,6 @@
 import { Typography } from '@ht6/react-ui';
 import { useEffect, useRef } from 'react';
+
 import styles from './Resources.module.scss';
 
 function Resources() {
@@ -13,7 +14,7 @@ function Resources() {
     window.addEventListener('message', handler);
     return () => {
       window.removeEventListener('message', handler);
-    }
+    };
   }, []);
   return (
     <div>
@@ -22,7 +23,7 @@ function Resources() {
       </Typography>
       <iframe
         className={styles.content}
-        src='/notion?id=12ce5072583f487cac5c6e2bb128b599'
+        src='/notion?id=1f51e615db27483381f4a3726e7f8cc3'
         title='HT6 Notion Renderer'
         ref={ref}
       />
