@@ -1,0 +1,75 @@
+@use '~@ht6/react-ui/dist/styles/colors.module';
+
+$_width: 10rem;
+$_height: 4.5rem;
+
+%cell {
+  grid-column: var(--c) / var(--cs, 1) span;
+  grid-row: var(--r) / var(--rs, 1) span;
+}
+
+.root {
+  grid-template-rows: max-content max-content 1px repeat(var(--rows), $_height 1px);
+  grid-template-columns: $_width 1px repeat(var(--cols), $_width 1px);
+  overflow: auto;
+  display: grid;
+}
+
+.label {
+  @extend %cell;
+  background-color: white;
+  box-sizing: border-box;
+  padding: 1.5rem 0.5rem;
+  align-items: center;
+  position: sticky;
+  height: $_height;
+  display: flex;
+  z-index: 2;
+  left: 0;
+}
+
+.accent {
+  background-color: var(--a);
+  margin-right: 0.625rem;
+  height: 1.5rem;
+  width: 0.25rem;
+}
+
+.day {
+  @extend %cell;
+  background-color: white;
+  left: calc($_width + 1px);
+  padding: 0 1rem 0.25rem;
+  position: sticky;
+}
+
+.hour {
+  @extend %cell;
+  padding: 0 1rem 0.825rem;
+}
+
+.line {
+  @extend %cell;
+  background-color: colors.getColor(primary-2);
+  z-index: 1;
+}
+
+.cover {
+  @extend %cell;
+  background-color: white;
+  position: sticky;
+  z-index: 2;
+  left: 0;
+}
+
+.hline {
+  z-index: 2;
+}
+
+.vline {
+  &.fixed {
+    position: sticky;
+    left: $_width;
+    z-index: 2;
+  }
+}
