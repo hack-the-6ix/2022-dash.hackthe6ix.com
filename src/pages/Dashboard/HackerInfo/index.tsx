@@ -7,7 +7,7 @@ import { HiClipboard } from 'react-icons/hi';
 import useAuth from '../../../components/Authentication/context';
 import Card from '../../../components/Card';
 import IconLink from '../../../components/IconLink';
-import { startDate } from '../../../config';
+import {inPersonDate} from '../../../config';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
@@ -98,7 +98,7 @@ function HackerInfo() {
               textWeight='bold'
               as='p'
             >
-              Scan the QR code on {dateFormat.format(startDate)} to check in:
+              Scan the QR code on {dateFormat.format(inPersonDate)} to check in:
             </Typography>
             <Card className={styles.qrBox}>
               <img
