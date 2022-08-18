@@ -1,7 +1,8 @@
-import { CSSProperties, Fragment, HTMLProps, useMemo } from "react";
+import { CSSProperties, Fragment, HTMLProps, ReactNode, useMemo } from "react";
 import { Typography } from "@ht6/react-ui";
 import cx from 'classnames';
-import { repeat, applyPosition, formatDate, serializeDate } from './utils';
+import color from 'color';
+import { repeat, applyPosition, formatDate, serializeDate, getCol } from './utils';
 import styles from './Calendar.module.scss';
 
 type Category<Categories extends string = string> = {
@@ -10,27 +11,32 @@ type Category<Categories extends string = string> = {
   label: string;
 }
 
-type ScheduleData<Categories extends string = string> = {
+export interface ScheduleData<Categories extends string = string> {
   category: Categories;
   start: Date;
   end: Date;
 }
 
-export interface CalendarProps<Categories extends string = string> extends HTMLProps<HTMLDivElement> {
-  schedule: ScheduleData<Categories>[];
+export interface CalendarProps<
+  Categories extends string = string,
+  Item extends ScheduleData<Categories> = ScheduleData<Categories>,
+> extends HTMLProps<HTMLDivElement> {
+  renderEvent: (event: Item, category: Category<Categories>) => ReactNode;
+  schedule: Item[];
   categories: Category<Categories>[];
   timezone?: string;
   locale?: string;
 }
-function Calendar<Categories extends string>({
-  timezone = 'America/Toronto',
+function Calendar<Categories extends string, Item extends ScheduleData<Categories>>({
   locale = 'en',
+  renderEvent,
   categories,
+  timezone,
   schedule,
   ...props
-}: CalendarProps<Categories>) {
+}: CalendarProps<Categories, Item>) {
   const scheduleByDay = useMemo(() => {
-    return schedule.reduce<{ [date: string]: ScheduleData<Categories>[] }>(
+    return schedule.reduce<{ [date: string]: Item[] }>(
       (acc, item) => {
         const day = serializeDate(item.start);
         if (!acc[day]) acc[day] = [];
@@ -43,6 +49,7 @@ function Calendar<Categories extends string>({
   const days = Object.keys(scheduleByDay);
   const cols = days.length * 24;
   const rows = categories.length;
+  const startDate = new Date(days[0] + ' 1:00');
 
   return (
     <div
@@ -50,38 +57,68 @@ function Calendar<Categories extends string>({
       style={{ ...props.style, '--cols': cols, '--rows': rows } as CSSProperties}
       className={cx(props.className, styles.root)}
     >
+      {Object.values(scheduleByDay).map((item, idx) => (
+        item.map((info, jdx) => {
+          const i = categories.findIndex(c => c.ref === info.category);
+          if (i === -1) return null;
+          const start = getCol(startDate, info.start);
+          const end = getCol(startDate, info.end);
+          const len = end - start + (end < start ? 48 : 0);
+
+          return (
+            <div
+              style={{
+                ...applyPosition(
+                  start + 3,
+                  (i * 2) + 3,
+                  len,
+                ),
+                '--a': color(categories[i].color).rgb().array(),
+              } as CSSProperties}
+              className={styles.event}
+              key={`${idx}-${jdx}`}
+            >
+              <div className={styles.box}>
+                {renderEvent(info, categories[i])}
+              </div>
+            </div>
+          )
+        })
+      )).flat()}
       {categories.map((category, idx) => (
         <div
-          style={{ ...applyPosition(1, (idx * 2) + 3), '--a': category.color } as CSSProperties}
+          style={{ ...applyPosition(1, (idx * 2) + 3), '--a': color(category.color).rgb().array() } as CSSProperties}
           className={styles.label}
           key={category.ref}
         >
           <div className={styles.accent}/>
-          <Typography textType='heading4' textColor='primary-3'>
+          <Typography textType='paragraph2' textWeight={650} textColor='primary-3'>
             {category.label}
           </Typography>
         </div>
       ))}
       {days.map((day, idx) => {
-        const offset = (idx * 24 * 2) + 3;
+        const offset = (idx * 48) + 3;
         return (
           <Fragment key={day}>
             <Typography
-              style={applyPosition(offset, 1, 3, 1)}
+              style={applyPosition(offset, 1, 6, 1)}
               className={styles.day}
               textColor='primary-3'
               textType='heading4'
             >
-              {formatDate(locale, timezone, new Date(day))}
+              <div className={cx(styles.line, styles.vline, styles.dline)}/>
+              {formatDate(locale, null, new Date(`${day} 1:00`))}
             </Typography>
             {repeat(24, jdx => (
               <Typography
-                style={applyPosition(offset + (jdx * 2), 2)}
+                style={applyPosition(offset + (jdx * 2), 2, 2)}
                 className={styles.hour}
                 textColor='primary-3'
                 textType='paragraph1'
                 key={jdx}
               >
+                {!!jdx && <div className={cx(styles.line, styles.vline)}/>}
                 {jdx % 12 || 12}:00{jdx > 12 ? 'pm' : 'am'}
               </Typography>
             ))}
@@ -89,13 +126,6 @@ function Calendar<Categories extends string>({
         );
       })}
       <div style={applyPosition(1, 1, 1, 2)} className={styles.cover}/>
-      {repeat(cols + 2, (idx) => (
-        <div
-          style={applyPosition((idx + 1) * 2, idx % 24 ? 2 : 1, 1, rows * 2 + 2)}
-          className={cx(styles.line, styles.vline, !idx && styles.fixed)}
-          key={idx}
-        />
-      ))}
       {repeat(rows + 1, (idx) => (
         <div
           style={applyPosition(1, (idx * 2) + 3, cols * 2 + 1, 1)}

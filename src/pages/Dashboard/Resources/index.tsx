@@ -23,6 +23,7 @@ function Resources() {
       </Typography>
       <iframe
         className={styles.content}
+        onLoad={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
         src='/notion?id=1f51e615db27483381f4a3726e7f8cc3'
         title='HT6 Notion Renderer'
         ref={ref}

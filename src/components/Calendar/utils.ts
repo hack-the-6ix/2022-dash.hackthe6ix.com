@@ -7,11 +7,17 @@ export type Time = `${number}:${number}`;
 function getDateComponents(date: Date) {
   return {
     Y: date.getFullYear(),
-    M: date.getMonth(),
+    M: date.getMonth() + 1,
     D: date.getDate(),
     h: date.getHours(),
     m: date.getMinutes(),
   };
+}
+
+export function getCol(startDate: Date, date: Date) {
+  const { D: sD } = getDateComponents(startDate);
+  const { D, h, m } = getDateComponents(date);
+  return ((D - sD) * 48) + (h * 2) + (m ? 1 : 0);
 }
 
 export function serializeDate(date: Date): Day {
@@ -19,14 +25,14 @@ export function serializeDate(date: Date): Day {
   return `${Y}-${M.toString(10).padStart(2, '0')}-${D.toString(10).padStart(2, '0')}` as any;
 }
 
-export function formatDate(locale: string, timeZone: string): (date: Date) => string;
-export function formatDate(locale: string, timeZone: string, date: Date): string;
-export function formatDate(locale: string, timeZone: string, date?: Date) {
+export function formatDate(locale: string, timeZone: string | null): (date: Date) => string;
+export function formatDate(locale: string, timeZone: string | null, date: Date): string;
+export function formatDate(locale: string, timeZone: string | null, date?: Date) {
   const { format } = new Intl.DateTimeFormat(locale, {
+    timeZone: timeZone ?? undefined,
     weekday: 'short',
     month: 'short',
     day: 'numeric',
-    timeZone,
   });
   const action = (date: Date) => `${format(date)}${getOrdinal(date)}`;
   if (date) return action(date);

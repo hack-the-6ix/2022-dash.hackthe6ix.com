@@ -23,7 +23,6 @@ const tabs: (Omit<Tab, 'element'> & {
   {
     label: <span>Resources</span>,
     element: <Resources />,
-    disabled: true,
     id: 'resources',
   },
   {

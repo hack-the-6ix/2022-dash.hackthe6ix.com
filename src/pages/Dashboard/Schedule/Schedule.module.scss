@@ -1,0 +1,16 @@
+@use '~@ht6/react-ui/dist/styles/colors.module';
+
+.event {
+  justify-content: center;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: 0 0.75rem;
+  display: flex;
+  height: 100%;
+}
+
+.text {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
