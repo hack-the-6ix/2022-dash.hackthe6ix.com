@@ -17,7 +17,7 @@ function Resources() {
     };
   }, []);
   return (
-    <div>
+    <>
       <Typography textColor='primary-3' textType='heading3' as='h3'>
         NOTION
       </Typography>
@@ -28,7 +28,7 @@ function Resources() {
         title='HT6 Notion Renderer'
         ref={ref}
       />
-    </div>
+    </>
   );
 }
 

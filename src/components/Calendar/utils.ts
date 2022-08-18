@@ -20,6 +20,12 @@ export function getCol(startDate: Date, date: Date) {
   return ((D - sD) * 48) + (h * 2) + (m ? 1 : 0);
 }
 
+export function getNow(startDate: Date, now = new Date()) {
+  const { D: sD } = getDateComponents(startDate);
+  const { D, h, m } = getDateComponents(now);
+  return ((D - sD) * 24) + h + (m / 60);
+}
+
 export function serializeDate(date: Date): Day {
   const { Y, M, D } = getDateComponents(date);
   return `${Y}-${M.toString(10).padStart(2, '0')}-${D.toString(10).padStart(2, '0')}` as any;

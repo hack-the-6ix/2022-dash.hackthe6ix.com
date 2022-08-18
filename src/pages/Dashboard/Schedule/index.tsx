@@ -1,6 +1,7 @@
 import { Typography } from "@ht6/react-ui";
 import Airtable from "airtable";
 import { useEffect, useState } from "react";
+// import { FaAngleLeft, FaAngleRight } from "react-icons/fa";
 import Calendar, { CalendarProps, ScheduleData } from "../../../components/Calendar";
 import styles from './Schedule.module.scss';
 
@@ -89,20 +90,38 @@ function Schedule() {
 
   const isReady = types && events;
   return isReady ? (
-    <Calendar
-      renderEvent={item => (
-        <div className={styles.event}>
-          <Typography className={styles.text} textType='paragraph2' textColor='primary-3'>
-            {item.name}
-          </Typography>
-          <Typography className={styles.text} textType='paragraph3' textColor='grey'>
-            {formatTimeRange(item.start, item.end)} | {item.location}
-          </Typography>
-        </div>
-      )}
-      categories={types}
-      schedule={events}
-    />
+    <div className={styles.root}>
+      <Calendar
+        renderEvent={item => (
+          <div className={styles.event}>
+            <Typography className={styles.text} textType='paragraph2' textColor='primary-3'>
+              {item.name}
+            </Typography>
+            <Typography className={styles.text} textType='paragraph3' textColor='grey'>
+              {formatTimeRange(item.start, item.end)} | {item.location}
+            </Typography>
+          </div>
+        )}
+        categories={types}
+        schedule={events}
+      />
+      {/*<div className={styles.buttons}>
+        <Button
+          className={styles.button}
+          buttonVariant='outline'
+        >
+          <FaAngleLeft className={styles.iconl}/>
+          Yesterday
+        </Button>
+        <Button
+          className={styles.button}
+          buttonVariant='outline'
+        >
+          Tomorrow
+          <FaAngleRight className={styles.iconr}/>
+        </Button>
+        </div>*/}
+    </div>
   ) : null;
 }
 

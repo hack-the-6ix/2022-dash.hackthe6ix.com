@@ -1,8 +1,8 @@
-import { CSSProperties, Fragment, HTMLProps, ReactNode, useMemo } from "react";
+import { CSSProperties, Fragment, HTMLProps, ReactNode, useEffect, useMemo, useState } from "react";
 import { Typography } from "@ht6/react-ui";
 import cx from 'classnames';
 import color from 'color';
-import { repeat, applyPosition, formatDate, serializeDate, getCol } from './utils';
+import { repeat, applyPosition, formatDate, serializeDate, getCol, getNow } from './utils';
 import styles from './Calendar.module.scss';
 
 type Category<Categories extends string = string> = {
@@ -26,6 +26,7 @@ export interface CalendarProps<
   categories: Category<Categories>[];
   timezone?: string;
   locale?: string;
+  focus?: string;
 }
 function Calendar<Categories extends string, Item extends ScheduleData<Categories>>({
   locale = 'en',
@@ -33,6 +34,7 @@ function Calendar<Categories extends string, Item extends ScheduleData<Categorie
   categories,
   timezone,
   schedule,
+  focus,
   ...props
 }: CalendarProps<Categories, Item>) {
   const scheduleByDay = useMemo(() => {
@@ -47,9 +49,23 @@ function Calendar<Categories extends string, Item extends ScheduleData<Categorie
     );
   }, [ schedule ]);
   const days = Object.keys(scheduleByDay);
+  const _startDate = days[0];
   const cols = days.length * 24;
   const rows = categories.length;
-  const startDate = new Date(days[0] + ' 1:00');
+  const startDate = useMemo(() => new Date(_startDate + ' 1:00'), [_startDate]);
+  const [ nowPos, setNowPos ] = useState<number>(Math.max(getNow(startDate), 0));
+
+  useEffect(() => {
+    const timer = window.setInterval(
+      () => {
+        setNowPos(Math.max(getNow(startDate), 0));
+      },
+      5000,
+    );
+    return () => {
+      window.clearInterval(timer);
+    }
+  }, [ startDate ]);
 
   return (
     <div
@@ -68,11 +84,8 @@ function Calendar<Categories extends string, Item extends ScheduleData<Categorie
           return (
             <div
               style={{
-                ...applyPosition(
-                  start + 3,
-                  (i * 2) + 3,
-                  len,
-                ),
+                ...applyPosition(start + 3, (i * 2) + 3, len),
+                '--b': color(categories[i].color).lightness(95).rgb().array(),
                 '--a': color(categories[i].color).rgb().array(),
               } as CSSProperties}
               className={styles.event}
@@ -87,7 +100,7 @@ function Calendar<Categories extends string, Item extends ScheduleData<Categorie
       )).flat()}
       {categories.map((category, idx) => (
         <div
-          style={{ ...applyPosition(1, (idx * 2) + 3), '--a': color(category.color).rgb().array() } as CSSProperties}
+          style={{ ...applyPosition(1, (idx * 2) + 3, 1, 2), '--a': color(category.color).rgb().array() } as CSSProperties}
           className={styles.label}
           key={category.ref}
         >
@@ -133,6 +146,13 @@ function Calendar<Categories extends string, Item extends ScheduleData<Categorie
           key={idx}
         />
       ))}
+      <div
+        style={{
+          ...applyPosition(2, 3, 1, rows * 2),
+          '--p': nowPos,
+        } as CSSProperties}
+        className={styles.now}
+      />
     </div>
   );
 }
