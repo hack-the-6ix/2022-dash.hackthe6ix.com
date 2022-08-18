@@ -22,16 +22,14 @@ const links = [
   {
     logo: require('../../../assets/hopin.png'),
     title: 'Hopin',
-    link: '#',
+    link: 'https://hopin.com/events/hack-the-6ix-2022?code=x251djeXmLiKPglrQsBHavu3B',
     description: 'All our live events and workshops are here!',
-    disabled: true,
   },
   {
     logo: require('../../../assets/devpost.png'),
     title: 'Devpost',
-    link: '#',
-    description: 'Submit your projects here!',
-    disabled: true,
+    link: 'https://hackthe6ix2022.devpost.com/',
+    description: 'Submit your projects here!'
   },
 ];
 
@@ -90,25 +88,25 @@ function HackerInfo() {
           Welcome to Hack the 6ix 2022! Thanks for confirming your attendance as
           a hacker!
         </Typography>
-        {qrCode && (
-          <>
-            <Typography
-              textColor='primary-3'
-              textType='paragraph1'
-              textWeight='bold'
-              as='p'
-            >
-              Scan the QR code on {dateFormat.format(inPersonDate)} to check in:
-            </Typography>
-            <Card className={styles.qrBox}>
-              <img
-                src={qrCode.message}
-                alt='Your QR code'
-                className={styles.qr}
-              />
-            </Card>
-          </>
-        )}
+        {/*{qrCode && (*/}
+        {/*  <>*/}
+        {/*    <Typography*/}
+        {/*      textColor='primary-3'*/}
+        {/*      textType='paragraph1'*/}
+        {/*      textWeight='bold'*/}
+        {/*      as='p'*/}
+        {/*    >*/}
+        {/*      Scan the QR code on {dateFormat.format(inPersonDate)} to check in:*/}
+        {/*    </Typography>*/}
+        {/*    <Card className={styles.qrBox}>*/}
+        {/*      <img*/}
+        {/*        src={qrCode.message}*/}
+        {/*        alt='Your QR code'*/}
+        {/*        className={styles.qr}*/}
+        {/*      />*/}
+        {/*    </Card>*/}
+        {/*  </>*/}
+        {/*)}*/}
       </div>
       <div>
         <Typography textColor='primary-3' textType='paragraph1' as='p'>
