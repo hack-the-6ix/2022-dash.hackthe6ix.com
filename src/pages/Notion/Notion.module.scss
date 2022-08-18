@@ -6,6 +6,7 @@
 :global {
   .notion-page-cover {
     min-height: unset;
+    overflow: hidden;
     height: unset;
   }
 }

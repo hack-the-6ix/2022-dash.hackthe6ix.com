@@ -330,6 +330,12 @@ function ApplicationContent() {
                 });
               } else {
                 toast.success('Attendance Accepted!', { id: 'rsvp' });
+                authCtx.updateUser({
+                  status: {
+                    ...authCtx.user.status,
+                    confirmed: true,
+                  },
+                })
                 navigate('/home');
               }
             },

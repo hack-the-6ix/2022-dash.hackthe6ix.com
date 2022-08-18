@@ -28,6 +28,13 @@ function App() {
           <Route path='home' element={<Dashboard />} />
           <Route path='notion' element={<Notion />} />
           <Route path='callback' element={<Callback />} />
+          {process.env.NODE_ENV === 'development' && (() => {
+            const component = require('../../pages/Dashboard/Schedule');
+            const Card = require('../../components/Card').default;
+            return <Route path='sandbox' element={<Card style={{ margin: '5rem', padding: '1.5rem' }}>
+              <component.default/>
+            </Card>}/>;
+          })()}
         </Route>
       </Routes>
 

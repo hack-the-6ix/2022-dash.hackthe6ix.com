@@ -52,7 +52,6 @@ function HackerInfo() {
   }
 
   const email = authCtx.user.email;
-  console.log(qrCode);
 
   const dateFormat = new Intl.DateTimeFormat('en-CA', {
     month: 'short',

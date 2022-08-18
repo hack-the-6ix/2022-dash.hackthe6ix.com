@@ -9,10 +9,11 @@ function Notion() {
   const { search } = useLocation();
 
   useEffect(() => {
+    document.documentElement.style.overflow = 'hidden';
     const q = new URLSearchParams(search);
     const id = q.get('id');
+  
     if (!id) return;
-
     const postHeight = () => {
       const height = document.body.offsetHeight;
       if (height) {
