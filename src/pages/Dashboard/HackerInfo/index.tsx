@@ -18,18 +18,21 @@ const links = [
     title: 'Discord',
     link: 'https://discord.com/invite/ZZm2Ycu7UH',
     description: 'Connect with hackers, mentors and sponsors!',
+    disabled: false
   },
   {
     logo: require('../../../assets/hopin.png'),
     title: 'Hopin',
     link: 'https://hopin.com/events/hack-the-6ix-2022?code=x251djeXmLiKPglrQsBHavu3B',
     description: 'All our live events and workshops are here!',
+    disabled: false
   },
   {
     logo: require('../../../assets/devpost.png'),
     title: 'Devpost',
     link: 'https://hackthe6ix2022.devpost.com/',
-    description: 'Submit your projects here!'
+    description: 'Submit your projects here!',
+    disabled: false
   },
 ];
 
