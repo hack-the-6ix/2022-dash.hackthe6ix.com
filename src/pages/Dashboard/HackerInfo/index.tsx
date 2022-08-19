@@ -1,6 +1,6 @@
 import { Button, Typography } from '@ht6/react-ui';
 import cx from 'classnames';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent } from 'react';
 import toast from 'react-hot-toast';
 import { HiClipboard } from 'react-icons/hi';
 
