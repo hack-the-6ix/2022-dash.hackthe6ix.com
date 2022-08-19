@@ -19,7 +19,7 @@ function Resources() {
   return (
     <>
       <Typography textColor='primary-3' textType='heading3' as='h3'>
-        NOTION
+        HACKER GUIDE
       </Typography>
       <iframe
         className={styles.content}
