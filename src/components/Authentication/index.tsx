@@ -122,14 +122,17 @@ export default function AuthenticationProvider({
     [revokeAuth]
   );
 
-  const updateUserApplication = useCallback(
+  const updateUser = useCallback(
     (payload: Partial<Pick<User, 'hackerApplication' | 'status'>>) => {
       setState((s) => {
         if (!s.isAuthenticated) {
-          console.warn('No user session found. Unable to update application');
+          console.warn('No user session found. Unable to update');
           return s;
         }
-        return { ...s, user: merge(s.user, payload) };
+        return {
+          ...s,
+          user: merge(s.user, payload),
+        };
       });
     },
     []
@@ -180,7 +183,7 @@ export default function AuthenticationProvider({
       value={{
         ...state,
         isReady: !state.isAuthenticating && !state.isRefreshing,
-        updateUserApplication,
+        updateUser,
         refreshAuth,
         revokeAuth,
         setAuth,

@@ -66,11 +66,12 @@ function TabSection<T extends Tab>({
         {lazy
           ? tabs[value]?.element
           : tabs
-              .filter((tab) => !tab.disabled)
               .map((tab, idx) => (
-                <div key={idx} hidden={value !== idx}>
-                  {tab.element}
-                </div>
+                !tab.disabled ? (
+                  <div key={idx} hidden={value !== idx}>
+                    {tab.element}
+                  </div>
+                ) : null
               ))}
       </Card>
     </Section>
