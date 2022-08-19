@@ -5,9 +5,7 @@ import toast from 'react-hot-toast';
 import { HiClipboard } from 'react-icons/hi';
 
 import useAuth from '../../../components/Authentication/context';
-import Card from '../../../components/Card';
 import IconLink from '../../../components/IconLink';
-import {inPersonDate} from '../../../config';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
@@ -37,16 +35,16 @@ const links = [
 ];
 
 function HackerInfo() {
-  const { makeRequest: getQrCode, data: qrCode } = useRequest<
-    ServerResponse<string>
-  >('/api/action/checkInQR');
+  // const { makeRequest: getQrCode, data: qrCode } = useRequest<
+  //   ServerResponse<string>
+  // >('/api/action/checkInQR');
   const { makeRequest, isLoading } =
     useRequest<ServerResponse>('/api/action/rsvp');
   const authCtx = useAuth();
 
-  useEffect(() => {
-    getQrCode();
-  }, [getQrCode]);
+  // useEffect(() => {
+  //   getQrCode();
+  // }, [getQrCode]);
 
   if (!authCtx.isAuthenticated) {
     return null;
@@ -54,10 +52,10 @@ function HackerInfo() {
 
   const email = authCtx.user.email;
 
-  const dateFormat = new Intl.DateTimeFormat('en-CA', {
-    month: 'short',
-    day: 'numeric',
-  });
+  // const dateFormat = new Intl.DateTimeFormat('en-CA', {
+  //   month: 'short',
+  //   day: 'numeric',
+  // });
 
   const unrsvp = async () => {
     toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
