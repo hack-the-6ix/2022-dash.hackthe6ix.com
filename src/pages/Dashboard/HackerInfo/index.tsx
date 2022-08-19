@@ -1,13 +1,11 @@
 import { Button, Typography } from '@ht6/react-ui';
 import cx from 'classnames';
-import { MouseEvent, useEffect } from 'react';
+import { MouseEvent } from 'react';
 import toast from 'react-hot-toast';
 import { HiClipboard } from 'react-icons/hi';
 
 import useAuth from '../../../components/Authentication/context';
-import Card from '../../../components/Card';
 import IconLink from '../../../components/IconLink';
-import {inPersonDate} from '../../../config';
 import { ServerResponse, useRequest } from '../../../utils/useRequest';
 
 import styles from './HackerInfo.module.scss';
@@ -18,34 +16,35 @@ const links = [
     title: 'Discord',
     link: 'https://discord.com/invite/ZZm2Ycu7UH',
     description: 'Connect with hackers, mentors and sponsors!',
+    disabled: false
   },
   {
     logo: require('../../../assets/hopin.png'),
     title: 'Hopin',
-    link: '#',
+    link: 'https://hopin.com/events/hack-the-6ix-2022?code=x251djeXmLiKPglrQsBHavu3B',
     description: 'All our live events and workshops are here!',
-    disabled: true,
+    disabled: false
   },
   {
     logo: require('../../../assets/devpost.png'),
     title: 'Devpost',
-    link: '#',
+    link: 'https://hackthe6ix2022.devpost.com/',
     description: 'Submit your projects here!',
-    disabled: true,
+    disabled: false
   },
 ];
 
 function HackerInfo() {
-  const { makeRequest: getQrCode, data: qrCode } = useRequest<
-    ServerResponse<string>
-  >('/api/action/checkInQR');
+  // const { makeRequest: getQrCode, data: qrCode } = useRequest<
+  //   ServerResponse<string>
+  // >('/api/action/checkInQR');
   const { makeRequest, isLoading } =
     useRequest<ServerResponse>('/api/action/rsvp');
   const authCtx = useAuth();
 
-  useEffect(() => {
-    getQrCode();
-  }, [getQrCode]);
+  // useEffect(() => {
+  //   getQrCode();
+  // }, [getQrCode]);
 
   if (!authCtx.isAuthenticated) {
     return null;
@@ -53,10 +52,10 @@ function HackerInfo() {
 
   const email = authCtx.user.email;
 
-  const dateFormat = new Intl.DateTimeFormat('en-CA', {
-    month: 'short',
-    day: 'numeric',
-  });
+  // const dateFormat = new Intl.DateTimeFormat('en-CA', {
+  //   month: 'short',
+  //   day: 'numeric',
+  // });
 
   const unrsvp = async () => {
     toast.loading('Cancelling RSVP...', { id: 'rsvp-home' });
@@ -90,25 +89,25 @@ function HackerInfo() {
           Welcome to Hack the 6ix 2022! Thanks for confirming your attendance as
           a hacker!
         </Typography>
-        {qrCode && (
-          <>
-            <Typography
-              textColor='primary-3'
-              textType='paragraph1'
-              textWeight='bold'
-              as='p'
-            >
-              Scan the QR code on {dateFormat.format(inPersonDate)} to check in:
-            </Typography>
-            <Card className={styles.qrBox}>
-              <img
-                src={qrCode.message}
-                alt='Your QR code'
-                className={styles.qr}
-              />
-            </Card>
-          </>
-        )}
+        {/*{qrCode && (*/}
+        {/*  <>*/}
+        {/*    <Typography*/}
+        {/*      textColor='primary-3'*/}
+        {/*      textType='paragraph1'*/}
+        {/*      textWeight='bold'*/}
+        {/*      as='p'*/}
+        {/*    >*/}
+        {/*      Scan the QR code on {dateFormat.format(inPersonDate)} to check in:*/}
+        {/*    </Typography>*/}
+        {/*    <Card className={styles.qrBox}>*/}
+        {/*      <img*/}
+        {/*        src={qrCode.message}*/}
+        {/*        alt='Your QR code'*/}
+        {/*        className={styles.qr}*/}
+        {/*      />*/}
+        {/*    </Card>*/}
+        {/*  </>*/}
+        {/*)}*/}
       </div>
       <div>
         <Typography textColor='primary-3' textType='paragraph1' as='p'>
